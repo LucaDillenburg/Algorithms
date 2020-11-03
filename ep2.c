@@ -21,66 +21,55 @@ int main() {
 
 		printf("Waiting input...\n");
 
-		// Amnt Matrix
-		// printf("Amnt Matrix...\n");
+		/* Amnt Matrix */
 		scanf("%d %d", &m, &n);
 		if (m==0 && n==0)
 			break;
 
-		// Alloc and Populate matrix
-		// printf("Alloc and Populate matrix...\n");
+		/* Alloc and Populate matrix */
 		matrix = (char**)malloc(sizeof(char*) * m);
 		for (i=0; i<m; i++) {
 			int j;
 			matrix[i] = (char*)malloc(sizeof(char) * n);
-			for (j=0; j<n; j++) {
-				// int a;
+			for (j=0; j<n; j++)
 				scanf("%c", &matrix[i][j]);
-				// scanf("%d", &a);
-			}
 		}
 
-		// Amnt Words
-		// printf("Amnt Words...\n");
+		/* Amnt Words */
 		scanf("%d", &p);
 
-		// Alloc and Populate Words
-		// printf("Alloc and Populate Words...\n");
+		/* Alloc and Populate Words */
 		maxLengthWord = max(m,n) + 1;
 		words = (char**)malloc(sizeof(char*) * p);
 		for (i=0; i<p; i++) {
-			// char a[100];
 			words[i] = (char*)malloc(sizeof(char) * maxLengthWord);
 			scanf("%s", words[i]);
-			// scanf("%s", &a);
 		}
 
-		//////////////////////////////////////////////////////////////////////////////////////////
+		/* #################################################################################### */
 		
-		// Print 
-		// printMatrix(matrix, m, n);
-		// printf("\n");
-		// printStrArray(words, p);
+		/*
+		Print 
+		printMatrix(matrix, m, n);
+		printf("\n");
+		printStrArray(words, p);
+		*/
 
-		//////////////////////////////////////////////////////////////////////////////////////////
+		/* #################################################################################### */
 		printf("Processing...\n");
 
-		// ...
-		// TODO: PROCESSING...
-		// ...
+		/* TODO: PROCESSING... */
 
-		//////////////////////////////////////////////////////////////////////////////////////////
+		/* #################################################################################### */
 		printf("Freeing...\n");
 
-		// Free Words
-		// printf("Free Words...\n");
+		/* Free Words */
 		for (i=0; i<p; i++) {
 			free(words[i]);
 		}
 		free(words);
 
-		// Free Matrix
-		// printf("Free Matrix...\n");
+		/* Free Matrix */
 		for (i=0; i<m; i++) {
 			free(matrix[i]);
 		}
