@@ -22,7 +22,7 @@ struct Board readBoard() {
       int d;
       scanf("%d", &d);
       if (d < 0)
-        board.matrix[i][j] = NOT_LETTER_CELL;
+        board.matrix[i][j] = BLACK_CELL;
       else
         board.matrix[i][j] = EMPTY_CELL;
     }
@@ -54,8 +54,11 @@ char isInsideBoard(struct Board board, struct Position pos) {
          pos.line < board.lines;
 }
 
-char isLetterPosition(struct Board board, struct Position pos) {
-  return board.matrix[pos.line][pos.column] != NOT_LETTER_CELL;
+char isBlackPosition(struct Board board, struct Position pos) {
+  return board.matrix[pos.line][pos.column] == BLACK_CELL;
+}
+char isEmptyPosition(struct Board board, struct Position pos) {
+  return board.matrix[pos.line][pos.column] == EMPTY_CELL;
 }
 
 position nextPositionBoard(struct Board board, struct Position pos) {
@@ -73,15 +76,28 @@ position nextPositionBoard(struct Board board, struct Position pos) {
   return pos;
 }
 
-/*
-char isBeginningOfWord(board board, int i, int j, char horiz) {
-        pair posBefore;
-        if (horiz) {
-                posBefore.first = i-1;
-                posBefore.second = j;
-        } else {
-                posBefore.first = i;
-                posBefore.second = j-1;
-        }
+int lengthWordStartingAt(struct Board board, struct Position pos, char horiz) {
+  int length;
+  struct Position prevPos = pos;
+  if (horiz)
+    prevPos.column--;
+  else
+    prevPos.line--;
+  if (isInsideBoard(board, prevPos) && !isBlackPosition(board, prevPos))
+    return -1;
+
+  for (length = 0;; length++, horiz ? pos.column++ : pos.line++)
+    if (!isInsideBoard(board, pos) || isBlackPosition(board, pos))
+      break;
+  return length;
 }
-*/
+
+char canAddThisWord(struct Board board, char *word, int length,
+                    struct Position pos, char horiz) {
+  int i;
+  for (i = 0; i < length; i++, horiz ? pos.column++ : pos.line++)
+    if (board.matrix[pos.line][pos.column] != EMPTY_CELL &&
+        word[i] != board.matrix[pos.line][pos.column])
+      return 0;
+  return 1;
+}

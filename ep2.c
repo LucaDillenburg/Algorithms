@@ -1,7 +1,9 @@
 #include "board.h"
 #include "utils.h"
+#include "vector.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /*
 Observavoes
@@ -12,14 +14,15 @@ Observavoes
 as palavras do vetor menor
 */
 
-void process(struct Board board, char **words, int amntWords);
+void process(struct Board board, struct Vector wordsStructure, int amntWords);
+void printWords(struct Vector wordsStructure);
 
 int main() {
   int instance;
   for (instance = 1;; instance++) {
     struct Board board;
     int amntWords, i;
-    char **words;
+    struct Vector wordsStructure;
     int maxLengthWord;
 
     /* Board */
@@ -27,34 +30,51 @@ int main() {
     if (board.lines == 0 || board.columns == 0)
       break;
 
-    /* Amnt Words */
+    /* Amnt wordsStructure */
     scanf("%d", &amntWords);
 
-    /* Alloc and Populate Words */
+    /* Alloc wordsStructure */
     maxLengthWord = max(board.columns, board.lines) + 1;
-    words = (char **)malloc(sizeof(char *) * amntWords);
+    wordsStructure = createVector(maxLengthWord);
+    for (i = 0; i < wordsStructure.length; i++) {
+      struct Vector *vector = (struct Vector *)malloc(sizeof(struct Vector));
+      *vector = createVector(amntWords);
+      pushToVector(&wordsStructure, vector);
+    }
+
+    /* Populate wordsStructure */
     for (i = 0; i < amntWords; i++) {
-      words[i] = (char *)malloc(sizeof(char) * maxLengthWord);
-      scanf("%s", words[i]);
+      char *word = (char *)malloc(sizeof(char) * maxLengthWord);
+      unsigned long lengthWord;
+      scanf("%s", word);
+      lengthWord = strlen(word);
+      pushToVector((struct Vector *)wordsStructure.array[lengthWord], word);
     }
 
     /* ####################################################################################
      */
+
+    printWords(wordsStructure);
+
     printf("Processing...\n");
-    process(board, words, amntWords);
+    process(board, wordsStructure, amntWords);
 
     printf("Instancia %d\n", instance);
     printBoard(board);
 
     /* ####################################################################################
      */
-    printf("Freeing...\n");
 
-    /* Free Words */
-    for (i = 0; i < amntWords; i++) {
-      free(words[i]);
+    /* Free wordsStructure */
+    for (i = 0; i < wordsStructure.length; i++) {
+      struct Vector *curWordsArray = wordsStructure.array[i];
+      int j;
+      for (j = 0; j <= curWordsArray->last; j++)
+        free(curWordsArray->array[j]); /* string malloc */
+      freeVector(*curWordsArray); /* create vectors inside wordsStructure */
+      free(curWordsArray);        /* malloc vectors inside wordsStructure */
     }
-    free(words);
+    freeVector(wordsStructure); /* create wordsStructure vector */
 
     /* Free Matrix */
     freeBoard(board);
@@ -63,19 +83,43 @@ int main() {
   return 0;
 }
 
-void process(struct Board board, char **words, int amntWords) {
-  /*
-  int j;
-  printf("h (lines): %d, w (columns): %d\n", board.height, board.width);
-  for (j=-2; j<=board.height; j++) {
-          int i;
-          printf("%d: ", j);
-          for (i=-2; i<=board.width; i++)
-                  if (isInsideBoard(board, i, j))
-                          printf("y ");
-                  else
-                          printf("n ");
-          printf("\n");
+void process(struct Board board, struct Vector wordsStructure, int amntWords) {
+  struct Position pos;
+  pos.line = 0;
+  pos.column = 0;
+  for (;;) {
+    if (!isBlackPosition(board, pos)) {
+      int lengthWordHoriz = lengthWordStartingAt(board, pos, 0);
+      if (lengthWordHoriz >= 2) {
+        /* TODO: process */
+        board.matrix[pos.line][pos.column] = '+';
+      }
+
+      /*
+      int lengthWordVert = lengthWordStartingAt(board, pos, 1);
+      if (lengthWordVert >= 2) {
+        board.matrix[pos.line][pos.column] = '+';
+      }
+      */
+    }
+    pos = nextPositionBoard(board, pos);
+    if (pos.column == 0 && pos.line == 0)
+      break;
   }
-  */
+}
+
+void printWords(struct Vector wordsStructure) {
+  int i;
+  for (i = 0; i < wordsStructure.length; i++) {
+    struct Vector *curWordsArray = wordsStructure.array[i];
+    int j;
+
+    printf("%3d: | ", i);
+    for (j = 0; j <= curWordsArray->last; j++) {
+      if (j != 0)
+        printf("     | ");
+      printf("%s\n", (char *)curWordsArray->array[j]);
+    }
+    printf("\n");
+  }
 }

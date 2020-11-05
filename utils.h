@@ -3,6 +3,4 @@
 
 int max(int a, int b);
 
-void printStrArray(char **matrix, int length);
-
 #endif

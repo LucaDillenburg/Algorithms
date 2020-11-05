@@ -2,7 +2,7 @@
 #define BOARD_H
 
 #define EMPTY_CELL '-'
-#define NOT_LETTER_CELL '*'
+#define BLACK_CELL '*'
 
 typedef struct Board {
   char **matrix;
@@ -19,13 +19,16 @@ struct Board readBoard();
 void freeBoard();
 void printBoard(struct Board board);
 
-char isLetterPosition(struct Board board, struct Position pos);
+char isBlackPosition(struct Board board, struct Position pos);
+char isEmptyPosition(struct Board board, struct Position pos);
 
 char isInsideBoard(struct Board board, struct Position pos);
 position nextPositionBoard(struct Board board, struct Position pos);
 /* direction: to the right and down */
 
-/* char isBeginningOfWord(board board, int i, int j, char horiz); */
-/* char canAddThisWord(board board, char *word, int i, int j); */
+int lengthWordStartingAt(struct Board board, struct Position pos,
+                         char horiz); /*TODO: TEST*/
+char canAddThisWord(struct Board board, char *word, int length,
+                    struct Position pos, char horiz); /*TODO: TEST*/
 
 #endif
