@@ -31,20 +31,36 @@ struct Board readBoard() {
   return board;
 }
 
-void freeBoard(struct Board board) {
+char **cloneMatrix(char **base, int lines, int columns) {
   int i;
-  for (i = 0; i < board.lines; i++) {
-    free(board.matrix[i]);
+  char **matrix = (char **)malloc(sizeof(char *) * lines);
+  for (i = 0; i < lines; i++) {
+    int j;
+    matrix[i] = (char *)malloc(sizeof(char) * columns);
+    for (j = 0; j < columns; j++)
+      matrix[i][j] = base[i][j];
   }
-  free(board.matrix);
+  return matrix;
 }
 
-void printBoard(struct Board board) {
+void freeMatrix(char **matrix, int lines) {
   int i;
-  for (i = 0; i < board.lines; i++) {
+  for (i = 0; i < lines; i++)
+    free(matrix[i]);
+  free(matrix);
+}
+void freeBoard(struct Board board) { freeMatrix(board.matrix, board.lines); }
+
+void printBoard(struct Board board) {
+  printMatrix(board.matrix, board.lines, board.columns);
+}
+
+void printMatrix(char **matrix, int lines, int columns) {
+  int i;
+  for (i = 0; i < lines; i++) {
     int j;
-    for (j = 0; j < board.columns; j++)
-      printf("%c ", board.matrix[i][j]);
+    for (j = 0; j < columns; j++)
+      printf("%c ", matrix[i][j]);
     printf("\n");
   }
 }
@@ -60,19 +76,23 @@ char isBlackPosition(struct Board board, struct Position pos) {
 char isEmptyPosition(struct Board board, struct Position pos) {
   return board.matrix[pos.line][pos.column] == EMPTY_CELL;
 }
+char posHasLetter(struct Board board, struct Position pos) {
+  return board.matrix[pos.line][pos.column] != EMPTY_CELL &&
+         board.matrix[pos.line][pos.column] != BLACK_CELL;
+}
 
 position nextPositionBoard(struct Board board, struct Position pos) {
-  pos.line++;
-  if (isInsideBoard(board, pos))
-    return pos;
-
-  pos.line = 0;
   pos.column++;
   if (isInsideBoard(board, pos))
     return pos;
 
-  pos.line = 0;
   pos.column = 0;
+  pos.line++;
+  if (isInsideBoard(board, pos))
+    return pos;
+
+  pos.line = -1;
+  pos.column = -1;
   return pos;
 }
 
@@ -92,6 +112,18 @@ int lengthWordStartingAt(struct Board board, struct Position pos, char horiz) {
   return length;
 }
 
+int shouldAddWord(struct Board board, struct Position pos, char horiz) {
+  int lengthWord;
+  if (isBlackPosition(board, pos))
+    return 0;
+
+  lengthWord = lengthWordStartingAt(board, pos, horiz);
+
+  if (lengthWord < 2)
+    return 0;
+  return lengthWord;
+}
+
 char canAddThisWord(struct Board board, char *word, int length,
                     struct Position pos, char horiz) {
   int i;
@@ -100,4 +132,11 @@ char canAddThisWord(struct Board board, char *word, int length,
         word[i] != board.matrix[pos.line][pos.column])
       return 0;
   return 1;
+}
+
+void addWord(struct Board board, char *word, int length, struct Position pos,
+             char horiz) {
+  int i;
+  for (i = 0; i < length; i++, horiz ? pos.column++ : pos.line++)
+    board.matrix[pos.line][pos.column] = word[i];
 }

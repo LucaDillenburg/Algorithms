@@ -15,6 +15,12 @@ void pushToVector(struct Vector *vector, void *item) {
   vector->array[vector->last] = item;
 }
 
+void *popFromVector(struct Vector *vector) {
+  void *p = vector->array[vector->last];
+  vector->last--;
+  return p;
+}
+
 void printStrVector(struct Vector vector) {
   int i;
   for (i = 0; i <= vector.last; i++)

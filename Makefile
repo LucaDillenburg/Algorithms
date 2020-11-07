@@ -11,10 +11,13 @@
 # - if you don't make to stop after an error at one command put '-' before the command
 
 EXECS = ep2
-CFLAGS = -Wall -ansi -pedantic -O2
+CFLAGS = -Wall -ansi -pedantic -O0 -g #-O2
 CC = gcc
 
 all: ep2
+
+run:
+	gdb ep2
 
 ep2: ep2.o board.o utils.o vector.o
 	$(CC) -o ep2 ep2.o board.o utils.o vector.o $(CFLAGS)
