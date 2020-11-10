@@ -19,10 +19,13 @@ OBJS = $(patsubst %.c, %.o, $(SRC))
 
 all: ep2
 
-print:
-	echo $(OBJS)
+debug:
+	clear
+	make
+	gdb ./ep2
+	make clean
 
-run-clean:
+run:
 	clear
 	make
 	-./ep2

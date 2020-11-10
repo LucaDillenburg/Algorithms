@@ -120,14 +120,13 @@ void freeDataToProcess(struct DataToProcess *dataToProcess) {
   freeVector(dataToProcess->wordsStructure); /* create wordsStructure vector */
 
   /* Free Matrix */
-  freeBoard(dataToProcess->board);
+  freeBoard(&dataToProcess->board);
 
   /* Free DataToProcess */
   free(dataToProcess);
 }
 
-/* #############################################################################
- */
+/* ######################################################################### */
 
 void printWords(struct Vector wordsStructure) {
   int i;

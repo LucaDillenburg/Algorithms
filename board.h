@@ -16,7 +16,7 @@ typedef struct Position {
 } position;
 
 struct Board readBoard();
-void freeBoard(struct Board board);
+void freeBoard(struct Board *board);
 void printBoard(struct Board board);
 void printMatrix(char **matrix, int lines, int columns);
 

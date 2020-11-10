@@ -1,5 +1,6 @@
 #include "process.h"
-#include "changeLogWords.h"
+#include "changeLogPaths.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 #define FIRST_DIRECTION 1
@@ -10,19 +11,25 @@ char process(struct Board *finalBoard, struct Vector wordsStructure,
   struct Vector stack = createVector(
       1); /* TODO: CHANGE PARAM to finalBoard->columns*finalBoard->lines */
   int i;
-  struct ChangeLogWords changeLogWords =
+  struct ChangeLogPaths changeLogPaths =
       createChangeLog(amntWords, finalBoard->lines);
   char foundPath = 0;
+
+  struct Vector initialPaths;
   struct Position initialPos;
   initialPos.line = 0;
   initialPos.column = 0;
-  pushItemsToVector(&stack, getAvailablePaths(*finalBoard, wordsStructure,
-                                              FIRST_DIRECTION, initialPos));
+  initialPaths = getAvailablePaths(*finalBoard, wordsStructure, FIRST_DIRECTION,
+                                   initialPos);
+  pushItemsToVector(&stack, initialPaths);
+  pushWordsAdded(&changeLogPaths, initialPaths, finalBoard->matrix);
+  freeVector(initialPaths);
   finalBoard->matrix = NULL;
 
   /* processing */
   while (!vectorIsEmpty(stack)) {
     struct InfoBoardSemiFilled *curInfoBoardSemiFilled = popFromVector(&stack);
+
     struct Vector possiblePathsFromCur;
     struct Board momentaryBoard = *finalBoard;
     struct WordInfo *curInfoWord;
@@ -51,25 +58,23 @@ char process(struct Board *finalBoard, struct Vector wordsStructure,
                                              curInfoBoardSemiFilled->pos);
 
     if (vectorIsEmpty(possiblePathsFromCur)) {
-      removeOptionsAddedLast(&changeLogWords);
+      removeLastOptionsGroup(&changeLogPaths);
       freeMatrix(momentaryBoard.matrix, momentaryBoard.lines);
     } else {
       pushItemsToVector(&stack, possiblePathsFromCur);
-      pushWordsAdded(&changeLogWords, possiblePathsFromCur,
+      pushWordsAdded(&changeLogPaths, possiblePathsFromCur,
                      momentaryBoard.matrix);
     }
 
     freeVector(possiblePathsFromCur);
+
+    removeLastOption(&changeLogPaths);
     free(curInfoBoardSemiFilled);
   }
 
   /* frees */
-  for (i = 0; i <= stack.last; i++) {
-    struct InfoBoardSemiFilled *curInfoBoardSemiFilled = stack.array[i];
-    free(curInfoBoardSemiFilled);
-  }
+  freeChangeLogWords(&changeLogPaths);
   freeVector(stack);
-  freeChangeLogWords(&changeLogWords);
 
   return foundPath;
 }

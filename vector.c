@@ -31,7 +31,7 @@ void pushToVector(struct Vector *vector, void *item) {
 
 void pushItemsToVector(struct Vector *vector, struct Vector items) {
   int i;
-  for (i = 0; i < items.last; i++)
+  for (i = 0; i <= items.last; i++)
     pushToVector(vector, items.array[i]);
 }
 

@@ -32,7 +32,11 @@ struct Board readBoard() {
   return board;
 }
 
-void freeBoard(struct Board board) { freeMatrix(board.matrix, board.lines); }
+void freeBoard(struct Board *board) {
+  if (board->matrix != NULL)
+    freeMatrix(board->matrix, board->lines);
+  board->matrix = NULL;
+}
 
 void printBoard(struct Board board) {
   printMatrix(board.matrix, board.lines, board.columns);

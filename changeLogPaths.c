@@ -1,9 +1,11 @@
-#include "changeLogWords.h"
+#include "changeLogPaths.h"
+#include "process.h"
 #include "utils.h"
+#include <stdio.h>
 #include <stdlib.h>
 
-struct ChangeLogWords createChangeLog(int amntWords, int linesMatrix) {
-  struct ChangeLogWords changeLog;
+struct ChangeLogPaths createChangeLog(int amntWords, int linesMatrix) {
+  struct ChangeLogPaths changeLog;
   changeLog.allWordsAdded = createVector(amntWords);
   changeLog.amntAddedEachIteration = createVector(amntWords);
   changeLog.matrixesAllocated = createVector(amntWords);
@@ -11,7 +13,7 @@ struct ChangeLogWords createChangeLog(int amntWords, int linesMatrix) {
   return changeLog;
 }
 
-void pushWordsAdded(struct ChangeLogWords *changeLog, struct Vector wordsToAdd,
+void pushWordsAdded(struct ChangeLogPaths *changeLog, struct Vector wordsToAdd,
                     char **matrix) {
   int *amntWordsAdded = (int *)malloc(sizeof(int));
   *amntWordsAdded = wordsToAdd.last + 1;
@@ -20,24 +22,27 @@ void pushWordsAdded(struct ChangeLogWords *changeLog, struct Vector wordsToAdd,
   pushItemsToVector(&changeLog->allWordsAdded, wordsToAdd);
 }
 
-void removeOptionsAddedLast(struct ChangeLogWords *changeLog) {
+void removeLastOptionsGroup(struct ChangeLogPaths *changeLog) {
   int i,
       *amntWordsAbandoned = popFromVector(&changeLog->amntAddedEachIteration);
 
   char **copiedMatrix = popFromVector(&changeLog->matrixesAllocated);
-  freeMatrix(copiedMatrix, changeLog->linesMatrix);
+  if (copiedMatrix != NULL)
+    freeMatrix(copiedMatrix, changeLog->linesMatrix);
 
   for (i = 0; i < *amntWordsAbandoned; i++) {
-    struct InfoBoardSemiFilled *cur = popFromVector(&changeLog->allWordsAdded);
+    struct InfoBoardSemiFilled *cur =
+        (struct InfoBoardSemiFilled *)popFromVector(&changeLog->allWordsAdded);
     free(cur);
   }
 
   free(amntWordsAbandoned);
 }
 
-void freeChangeLogWords(struct ChangeLogWords *changeLog) {
+void freeChangeLogWords(struct ChangeLogPaths *changeLog) {
   while (!vectorIsEmpty(changeLog->amntAddedEachIteration))
-    removeOptionsAddedLast(changeLog);
+    removeLastOptionsGroup(changeLog);
+
   freeVector(changeLog->allWordsAdded);
   freeVector(changeLog->matrixesAllocated);
   freeVector(changeLog->amntAddedEachIteration);
