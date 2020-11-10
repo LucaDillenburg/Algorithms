@@ -1,35 +1,44 @@
 #include "changeLogWords.h"
+#include "utils.h"
 #include <stdlib.h>
 
-struct ChangeLogWords createChangeLogWords(int amntWords) {
+struct ChangeLogWords createChangeLog(int amntWords, int linesMatrix) {
   struct ChangeLogWords changeLog;
   changeLog.allWordsAdded = createVector(amntWords);
   changeLog.amntAddedEachIteration = createVector(amntWords);
+  changeLog.matrixesAllocated = createVector(amntWords);
+  changeLog.linesMatrix = linesMatrix;
   return changeLog;
 }
 
-void freeChangeLogWords(struct ChangeLogWords changeLog) {
-  int i;
-  for (i = 0; i <= changeLog.amntAddedEachIteration.last; i++)
-    free(changeLog.amntAddedEachIteration.array[i]);
-  freeVector(changeLog.allWordsAdded);
-  freeVector(changeLog.amntAddedEachIteration);
-}
-
-void wordsAdded(struct ChangeLogWords *changeLog,
-                struct Vector /*InfoBoardSemiFilled*/ wordsToAdd) {
-  int i;
+void pushWordsAdded(struct ChangeLogWords *changeLog, struct Vector wordsToAdd,
+                    char **matrix) {
   int *amntWordsAdded = (int *)malloc(sizeof(int));
   *amntWordsAdded = wordsToAdd.last + 1;
   pushToVector(&changeLog->amntAddedEachIteration, amntWordsAdded);
-  for (i = 0; i < *amntWordsAdded; i++)
-    pushToVector(&changeLog->allWordsAdded, wordsToAdd.array[i]);
+  pushToVector(&changeLog->matrixesAllocated, matrix);
+  pushItemsToVector(&changeLog->allWordsAdded, wordsToAdd);
 }
 
-void pathWasAbandoned(struct ChangeLogWords *changeLog) {
-  int i;
-  int *amntWordsAbandoned = popFromVector(&changeLog->amntAddedEachIteration);
-  for (i = 0; i < *amntWordsAbandoned; i++)
-    popFromVector(&changeLog->allWordsAdded);
+void removeOptionsAddedLast(struct ChangeLogWords *changeLog) {
+  int i,
+      *amntWordsAbandoned = popFromVector(&changeLog->amntAddedEachIteration);
+
+  char **copiedMatrix = popFromVector(&changeLog->matrixesAllocated);
+  freeMatrix(copiedMatrix, changeLog->linesMatrix);
+
+  for (i = 0; i < *amntWordsAbandoned; i++) {
+    struct InfoBoardSemiFilled *cur = popFromVector(&changeLog->allWordsAdded);
+    free(cur);
+  }
+
   free(amntWordsAbandoned);
+}
+
+void freeChangeLogWords(struct ChangeLogWords *changeLog) {
+  while (!vectorIsEmpty(changeLog->amntAddedEachIteration))
+    removeOptionsAddedLast(changeLog);
+  freeVector(changeLog->allWordsAdded);
+  freeVector(changeLog->matrixesAllocated);
+  freeVector(changeLog->amntAddedEachIteration);
 }

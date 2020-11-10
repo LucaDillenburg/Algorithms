@@ -10,7 +10,8 @@ char process(struct Board *finalBoard, struct Vector wordsStructure,
   struct Vector stack = createVector(
       1); /* TODO: CHANGE PARAM to finalBoard->columns*finalBoard->lines */
   int i;
-  struct ChangeLogWords changeLogWords = createChangeLogWords();
+  struct ChangeLogWords changeLogWords =
+      createChangeLog(amntWords, finalBoard->lines);
   char foundPath = 0;
   struct Position initialPos;
   initialPos.line = 0;
@@ -23,7 +24,7 @@ char process(struct Board *finalBoard, struct Vector wordsStructure,
   while (!vectorIsEmpty(stack)) {
     struct InfoBoardSemiFilled *curInfoBoardSemiFilled = popFromVector(&stack);
     struct Vector possiblePathsFromCur;
-    struct Board momentaryBoard;
+    struct Board momentaryBoard = *finalBoard;
     struct WordInfo *curInfoWord;
 
     if (curInfoBoardSemiFilled->pos.column < 0 &&
@@ -49,11 +50,13 @@ char process(struct Board *finalBoard, struct Vector wordsStructure,
                                              curInfoBoardSemiFilled->horiz,
                                              curInfoBoardSemiFilled->pos);
 
-    if (vectorIsEmpty(possiblePathsFromCur))
-      pathWasAbandoned(&changeLogWords);
-    else {
+    if (vectorIsEmpty(possiblePathsFromCur)) {
+      removeOptionsAddedLast(&changeLogWords);
+      freeMatrix(momentaryBoard.matrix, momentaryBoard.lines);
+    } else {
       pushItemsToVector(&stack, possiblePathsFromCur);
-      wordsAdded(&changeLogWords, possiblePathsFromCur);
+      pushWordsAdded(&changeLogWords, possiblePathsFromCur,
+                     momentaryBoard.matrix);
     }
 
     freeVector(possiblePathsFromCur);
@@ -61,11 +64,12 @@ char process(struct Board *finalBoard, struct Vector wordsStructure,
   }
 
   /* frees */
-  /* TODO: free matrixes */
-  for (i = 0; i <= stack.last; i++)
-    free(stack.array[i]);
+  for (i = 0; i <= stack.last; i++) {
+    struct InfoBoardSemiFilled *curInfoBoardSemiFilled = stack.array[i];
+    free(curInfoBoardSemiFilled);
+  }
   freeVector(stack);
-  freeChangeLogWords(changeLogWords);
+  freeChangeLogWords(&changeLogWords);
 
   return foundPath;
 }
@@ -93,6 +97,10 @@ struct Vector getAvailablePaths(struct Board board,
       struct WordId blankWordId;
       blankWordId.length = -1;
       blankWordId.index = -1;
+
+      nextPos.column = -1;
+      nextPos.line = -1;
+
       filteredPaths = createVector(1);
       pushToVector(&filteredPaths,
                    newInfoBoardSemiFilled(nextHoriz, board.matrix, nextPos,

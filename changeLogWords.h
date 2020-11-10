@@ -5,15 +5,17 @@
 
 struct ChangeLogWords {
   struct Vector allWordsAdded;
+  struct Vector matrixesAllocated;
   struct Vector amntAddedEachIteration;
+  int linesMatrix;
 };
 
-struct ChangeLogWords createChangeLogWords();
-void freeChangeLogWords(struct ChangeLogWords changeLog);
+struct ChangeLogWords createChangeLog(int amntWords, int linesMatrix);
 
-void wordsAdded(
-    struct ChangeLogWords *changeLog,
-    struct Vector /*InfoBoardSemiFilled*/ wordsToAdd);   /* TODO: TEST */
-void pathWasAbandoned(struct ChangeLogWords *changeLog); /* TODO: TEST */
+void pushWordsAdded(struct ChangeLogWords *changeLog, struct Vector wordsToAdd,
+                    char **matrix);                            /* TODO: TEST */
+void removeOptionsAddedLast(struct ChangeLogWords *changeLog); /* TODO: TEST */
+
+void freeChangeLogWords(struct ChangeLogWords *changeLog); /* TODO: TEST */
 
 #endif

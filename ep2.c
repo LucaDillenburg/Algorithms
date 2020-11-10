@@ -27,21 +27,23 @@ int main() {
   int instance;
   struct Vector dataToProcessVector =
       createVector(1); /* TODO: change this value */
-  for (instance = 1;; instance++) {
+  for (instance = 0;; instance++) {
     struct DataToProcess *dataToProcess = readDataToProcess();
     if (dataToProcess == NULL)
       break;
     pushToVector(&dataToProcessVector, dataToProcess);
   }
 
-  for (instance = 1; instance <= dataToProcessVector.last; instance++) {
+  printf("\n");
+
+  for (instance = 0; instance <= dataToProcessVector.last; instance++) {
     struct DataToProcess *curDataToProcess =
         dataToProcessVector.array[instance];
     char hasSolution =
         process(&curDataToProcess->board, curDataToProcess->wordsStructure,
                 curDataToProcess->amntWords);
 
-    printf("Instancia %d\n", instance);
+    printf("Instancia %d\n", instance + 1);
     if (hasSolution)
       printBoard(curDataToProcess->board);
     else

@@ -20,9 +20,6 @@ void freeBoard(struct Board board);
 void printBoard(struct Board board);
 void printMatrix(char **matrix, int lines, int columns);
 
-char **cloneMatrix(char **matrix, int lines, int columns);
-void freeMatrix(char **matrix, int lines);
-
 char isBlackPosition(struct Board board, struct Position pos);
 char isEmptyPosition(struct Board board, struct Position pos);
 
