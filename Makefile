@@ -25,7 +25,7 @@ print:
 run-clean:
 	clear
 	make
-	./ep2
+	-./ep2
 	make clean
 
 ep2: $(OBJS)
