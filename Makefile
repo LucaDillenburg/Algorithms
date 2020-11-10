@@ -19,8 +19,8 @@ all: ep2
 run:
 	gdb ep2
 
-ep2: ep2.o board.o utils.o vector.o
-	$(CC) -o ep2 ep2.o board.o utils.o vector.o $(CFLAGS)
+ep2: ep2.o board.o utils.o vector.o changeLogWords.o
+	$(CC) -o ep2 ep2.o board.o utils.o vector.o changeLogWords.o $(CFLAGS)
 
 ep2.o: ep2.c
 	$(CC) -c ep2.c $(CFLAGS)
@@ -33,6 +33,9 @@ utils.o: utils.c utils.h
 
 vector.o: vector.c vector.h
 	$(CC) -c vector.c $(CFLAGS)
+
+changeLogWords.o: changeLogWords.c changeLogWords.h
+	$(CC) -c changeLogWords.c $(CFLAGS)
 
 clean:
 	-rm $(EXECS) *.o

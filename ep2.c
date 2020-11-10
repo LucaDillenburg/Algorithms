@@ -1,4 +1,5 @@
 #include "board.h"
+#include "changeLogWords.h"
 #include "utils.h"
 #include "vector.h"
 #include <stdio.h>
@@ -15,22 +16,11 @@ as palavras do vetor menor
 */
 
 char process(struct Board *board, struct Vector wordsStructure, int amntWords);
-struct WordChoosenInfo *getChoosenWord(struct Board board,
-                                       struct Vector wordsStructure,
-                                       int lengthWord, struct Position pos,
-                                       int horiz);
 void printWords(struct Vector wordsStructure);
 
 struct WordInfo {
   char *word;
   char available;
-};
-struct WordChoosenInfo {
-  int length;
-  int index;
-  struct Position pos;
-  char horiz;
-  char **matrix;
 };
 
 int main() {
@@ -162,65 +152,164 @@ char process(struct Board *board, struct Vector wordsStructure, int amntWords) {
   return recProcess(board, wordsStructure, pos, 1);
 }
 
-/*
-char process(struct Board board, struct Vector wordsStructure, int amntWords) {
-  struct Vector stack = createVector(amntWords+2);
-  struct WordChoosenInfo first;
-  first.length = -1;
-  first.index = -1;
-  first.pos.line = 0;
-  first.pos.column = 0;
-  first.pos.horiz = 0;
+struct WordId {
+  int length;
+  int index;
+};
 
+struct WordInfo *getInfoWordFromId(struct Vector wordsStructure,
+                                   struct WordId id) {
+  struct Vector *wordWithLength = wordsStructure.array[id.length];
+  return wordWithLength->array[id.index];
+}
+
+struct InfoBoardSemiFilled {
+  char horiz;
+  char **matrix;
+  struct Position pos;
+  struct WordId wordId;
+};
+
+struct InfoBoardSemiFilled *newInfoBoardSemiFilled(char horiz, char **matrix,
+                                                   struct Position pos,
+                                                   struct WordId wordId) {
+  struct InfoBoardSemiFilled *ptr =
+      (struct InfoBoardSemiFilled *)malloc(sizeof(struct InfoBoardSemiFilled));
+  ptr->horiz = horiz;
+  ptr->matrix = matrix;
+  ptr->pos = pos;
+  return ptr;
+}
+
+#define FIRST_DIRECTION 1
+struct Vector getAvailablePaths(struct Board board,
+                                struct Vector wordsStructure, int prevHoriz,
+                                struct Position prevPos) {
   for (;;) {
-    printf("(%d, %d): ", pos.line, pos.column);
-    if (!isBlackPosition(board, pos)) {
-      char horiz;
-      int lengthWord;
+    struct Vector filteredPaths, *unfilteredWords;
+    char nextHoriz;
+    int lengthWord, i;
+    struct Position nextPos;
 
-      horiz = 0;
-      lengthWord = lengthWordStartingAt(board, pos, horiz);
-      if (lengthWord >= 2) {
-        struct WordChoosenInfo* choosenWord = getChoosenWord(board,
-wordsStructure, lengthWord, pos, horiz); if (choosenWord != NULL)
-          pushToVector(&stack, choosenWord);
-        else {
-          / * TODO: BACK-TRACK * /
-          return 1;
-        }
+    /* direction */
+    if (prevHoriz) {
+      nextHoriz = 0;
+      nextPos = prevPos;
+    } else {
+      nextHoriz = 1;
+      nextPos = nextPositionBoard(board, prevPos);
+    }
+
+    /* end of board */
+    if (!isInsideBoard(board, nextPos)) {
+      struct WordId blankWordId;
+      blankWordId.length = -1;
+      blankWordId.index = -1;
+      filteredPaths = createVector(1);
+      pushToVector(&filteredPaths,
+                   newInfoBoardSemiFilled(nextHoriz, board.matrix, nextPos,
+                                          blankWordId));
+      return filteredPaths;
+    }
+
+    /* length word */
+    lengthWord = shouldAddWord(board, prevPos, prevHoriz);
+
+    /* not a word */
+    if (lengthWord < 2) {
+      prevPos = nextPos;
+      prevHoriz = nextHoriz;
+      continue;
+    }
+
+    /* preparation and create vector */
+    unfilteredWords = (struct Vector *)wordsStructure.array[lengthWord];
+    filteredPaths = createVector(unfilteredWords->length);
+
+    /* add words */
+    for (i = 0; i <= unfilteredWords->last; i++) {
+      struct WordInfo *infoWord = unfilteredWords->array[i];
+      if (infoWord->available &&
+          canAddThisWord(board, infoWord->word, lengthWord, prevPos,
+                         prevHoriz)) {
+        struct WordId id;
+        id.length = lengthWord;
+        id.index = i;
+        pushToVector(&filteredPaths, newInfoBoardSemiFilled(
+                                         nextHoriz, board.matrix, nextPos, id));
       }
-
-      / * TODO: horiz=1 * /
     }
-    pos = nextPositionBoard(board, pos);
-    if (pos.column < 0 && pos.line < 0)
+
+    /* the vector can be empty */
+    return filteredPaths;
+  }
+}
+
+char iterativeprocess(struct Board *finalBoard, struct Vector wordsStructure,
+                      int amntWords) {
+  /* declare variables and add first item */
+  struct Vector stack = createVector(
+      1); /* TODO: CHANGE PARAM to finalBoard->columns*finalBoard->lines */
+  int i;
+  struct ChangeLogWords changeLogWords = createChangeLogWords();
+  char foundPath = 0;
+  struct Position initialPos;
+  initialPos.line = 0;
+  initialPos.column = 0;
+  pushItemsToVector(&stack, getAvailablePaths(*finalBoard, wordsStructure,
+                                              FIRST_DIRECTION, initialPos));
+  finalBoard->matrix = NULL;
+
+  /* processing */
+  while (!vectorIsEmpty(stack)) {
+    struct InfoBoardSemiFilled *curInfoBoardSemiFilled = popFromVector(&stack);
+    struct Vector possiblePathsFromCur;
+    struct Board momentaryBoard;
+    struct WordInfo *curInfoWord;
+
+    if (curInfoBoardSemiFilled->pos.column < 0 &&
+        curInfoBoardSemiFilled->pos.line < 0) {
+      finalBoard->matrix = curInfoBoardSemiFilled->matrix;
+      free(curInfoBoardSemiFilled);
+      foundPath = 1;
       break;
-  }
-  return 1;
-}
-
-struct WordChoosenInfo* getChoosenWord(struct Board board, struct Vector
-wordsStructure, int lengthWord, struct Position pos, int horiz) { struct Vector
-*possibleWords = wordsStructure.array[lengthWord]; int i; for (i=0;
-i<=possibleWords->last; i++) { struct WordInfo *curWordInfo =
-possibleWords->array[i]; if (curWordInfo->available && canAddThisWord(board,
-curWordInfo->word, lengthWord, pos, horiz)) { struct WordChoosenInfo
-*choosenWord;
-
-      curWordInfo->available = 0;
-      addWord(board, curWordInfo->word, lengthWord, pos, horiz);
-
-      choosenWord = (struct WordChoosenInfo *)malloc(sizeof(struct
-WordChoosenInfo)); choosenWord->length = lengthWord; choosenWord->index = i;
-      choosenWord->pos = pos;
-      choosenWord->horiz = horiz;
-      return choosenWord;
     }
+
+    momentaryBoard.matrix =
+        cloneMatrix(finalBoard->matrix, finalBoard->lines, finalBoard->columns);
+    ;
+
+    curInfoWord =
+        getInfoWordFromId(wordsStructure, curInfoBoardSemiFilled->wordId);
+    curInfoWord->available = 0;
+    addWord(momentaryBoard, curInfoWord->word,
+            curInfoBoardSemiFilled->wordId.length, curInfoBoardSemiFilled->pos,
+            curInfoBoardSemiFilled->horiz);
+
+    possiblePathsFromCur = getAvailablePaths(momentaryBoard, wordsStructure,
+                                             curInfoBoardSemiFilled->horiz,
+                                             curInfoBoardSemiFilled->pos);
+
+    if (vectorIsEmpty(possiblePathsFromCur))
+      pathWasAbandoned(&changeLogWords);
+    else {
+      pushItemsToVector(&stack, possiblePathsFromCur);
+      wordsAdded(&changeLogWords, possiblePathsFromCur);
+    }
+
+    freeVector(possiblePathsFromCur);
+    free(curInfoBoardSemiFilled);
   }
 
-  return NULL;
+  /* frees */
+  /* TODO: free matrixes */
+  for (i = 0; i <= stack.last; i++)
+    free(stack.array[i]);
+  freeVector(stack);
+  freeChangeLogWords(changeLogWords);
+
+  return foundPath;
 }
-*/
 
 void printWords(struct Vector wordsStructure) {
   int i;
