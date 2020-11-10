@@ -1,4 +1,5 @@
 #include "process.h"
+#include "specialStack.h"
 #include "vector.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,12 +22,10 @@ struct DataToProcess {
 
 struct DataToProcess *readDataToProcess();
 void freeDataToProcess(struct DataToProcess *);
-void printWords(struct Vector wordsStructure);
 
 int main() {
   int instance;
-  struct Vector dataToProcessVector =
-      createVector(1); /* TODO: change this value */
+  struct Vector dataToProcessVector = createVector(10);
   for (instance = 0;; instance++) {
     struct DataToProcess *dataToProcess = readDataToProcess();
     if (dataToProcess == NULL)
@@ -124,27 +123,4 @@ void freeDataToProcess(struct DataToProcess *dataToProcess) {
 
   /* Free DataToProcess */
   free(dataToProcess);
-}
-
-/* ######################################################################### */
-
-void printWords(struct Vector wordsStructure) {
-  int i;
-  for (i = 0; i < wordsStructure.length; i++) {
-    struct Vector *curWordsArray = wordsStructure.array[i];
-    int j;
-
-    printf("%3d: | ", i);
-    for (j = 0; j <= curWordsArray->last; j++) {
-      struct WordInfo *curWordInfo = curWordsArray->array[j];
-      if (j != 0)
-        printf("     | ");
-      printf("%s ", curWordInfo->word);
-      if (curWordInfo->available)
-        printf("(available)\n");
-      else
-        printf("(USED)\n");
-    }
-    printf("\n");
-  }
 }

@@ -44,7 +44,7 @@ void *popFromVector(struct Vector *vector) {
 void printStrVector(struct Vector vector) {
   int i;
   for (i = 0; i <= vector.last; i++)
-    printf("%s\n", (char *)vector.array[i]);
+    printf("'%s', ", (char *)vector.array[i]);
 }
 
 char vectorIsEmpty(struct Vector vector) { return vector.last < 0; }

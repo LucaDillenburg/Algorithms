@@ -1,5 +1,5 @@
 #include "process.h"
-#include "changeLogPaths.h"
+#include "specialStack.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,11 +8,8 @@
 char process(struct Board *finalBoard, struct Vector wordsStructure,
              int amntWords) {
   /* declare variables and add first item */
-  struct Vector stack = createVector(
-      1); /* TODO: CHANGE PARAM to finalBoard->columns*finalBoard->lines */
-  int i;
-  struct ChangeLogPaths changeLogPaths =
-      createChangeLog(amntWords, finalBoard->lines);
+  struct SpecialStack stack =
+      createSpecialStack(amntWords, finalBoard->lines, finalBoard->columns);
   char foundPath = 0;
 
   struct Vector initialPaths;
@@ -21,30 +18,29 @@ char process(struct Board *finalBoard, struct Vector wordsStructure,
   initialPos.column = 0;
   initialPaths = getAvailablePaths(*finalBoard, wordsStructure, FIRST_DIRECTION,
                                    initialPos);
-  pushItemsToVector(&stack, initialPaths);
-  pushWordsAdded(&changeLogPaths, initialPaths, finalBoard->matrix);
-  freeVector(initialPaths);
+  firstPushPathGroup(&stack, initialPaths, finalBoard->matrix);
   finalBoard->matrix = NULL;
 
   /* processing */
-  while (!vectorIsEmpty(stack)) {
-    struct InfoBoardSemiFilled *curInfoBoardSemiFilled = popFromVector(&stack);
-
+  while (!specialStackIsEmpty(stack)) {
     struct Vector possiblePathsFromCur;
-    struct Board momentaryBoard = *finalBoard;
     struct WordInfo *curInfoWord;
+    struct Board momentaryBoard;
+    struct PosHoriz nextPosHoriz;
+
+    struct InfoBoardSemiFilled *curInfoBoardSemiFilled = getTopItem(stack);
 
     if (curInfoBoardSemiFilled->pos.column < 0 &&
         curInfoBoardSemiFilled->pos.line < 0) {
-      finalBoard->matrix = curInfoBoardSemiFilled->matrix;
-      free(curInfoBoardSemiFilled);
+      finalBoard->matrix = cloneMatrix(curInfoBoardSemiFilled->matrix,
+                                       finalBoard->lines, finalBoard->columns);
       foundPath = 1;
       break;
     }
 
-    momentaryBoard.matrix =
-        cloneMatrix(finalBoard->matrix, finalBoard->lines, finalBoard->columns);
-    ;
+    momentaryBoard = *finalBoard;
+    momentaryBoard.matrix = cloneMatrix(curInfoBoardSemiFilled->matrix,
+                                        finalBoard->lines, finalBoard->columns);
 
     curInfoWord =
         getInfoWordFromId(wordsStructure, curInfoBoardSemiFilled->wordId);
@@ -53,73 +49,59 @@ char process(struct Board *finalBoard, struct Vector wordsStructure,
             curInfoBoardSemiFilled->wordId.length, curInfoBoardSemiFilled->pos,
             curInfoBoardSemiFilled->horiz);
 
-    possiblePathsFromCur = getAvailablePaths(momentaryBoard, wordsStructure,
-                                             curInfoBoardSemiFilled->horiz,
-                                             curInfoBoardSemiFilled->pos);
+    nextPosHoriz = getNextPosHoriz(momentaryBoard, curInfoBoardSemiFilled->pos,
+                                   curInfoBoardSemiFilled->horiz);
+    possiblePathsFromCur = getAvailablePaths(
+        momentaryBoard, wordsStructure, nextPosHoriz.horiz, nextPosHoriz.pos);
 
     if (vectorIsEmpty(possiblePathsFromCur)) {
-      removeLastOptionsGroup(&changeLogPaths);
       freeMatrix(momentaryBoard.matrix, momentaryBoard.lines);
+      popItemInPathGroup(&stack, wordsStructure);
     } else {
-      pushItemsToVector(&stack, possiblePathsFromCur);
-      pushWordsAdded(&changeLogPaths, possiblePathsFromCur,
-                     momentaryBoard.matrix);
+      struct WordId *ptrWordId = malloc(sizeof(struct WordId));
+      *ptrWordId = curInfoBoardSemiFilled->wordId;
+      popItemAndPushPathGroup(&stack, possiblePathsFromCur, ptrWordId,
+                              momentaryBoard.matrix);
     }
 
     freeVector(possiblePathsFromCur);
-
-    removeLastOption(&changeLogPaths);
-    free(curInfoBoardSemiFilled);
   }
 
   /* frees */
-  freeChangeLogWords(&changeLogPaths);
-  freeVector(stack);
+  freeSpecialStack(&stack);
 
   return foundPath;
 }
 
 struct Vector getAvailablePaths(struct Board board,
-                                struct Vector wordsStructure, int prevHoriz,
-                                struct Position prevPos) {
+                                struct Vector wordsStructure, int horiz,
+                                struct Position pos) {
   for (;;) {
     struct Vector filteredPaths, *unfilteredWords;
-    char nextHoriz;
     int lengthWord, i;
-    struct Position nextPos;
-
-    /* direction */
-    if (prevHoriz) {
-      nextHoriz = 0;
-      nextPos = prevPos;
-    } else {
-      nextHoriz = 1;
-      nextPos = nextPositionBoard(board, prevPos);
-    }
 
     /* end of board */
-    if (!isInsideBoard(board, nextPos)) {
+    if (!isInsideBoard(board, pos)) {
       struct WordId blankWordId;
       blankWordId.length = -1;
       blankWordId.index = -1;
-
-      nextPos.column = -1;
-      nextPos.line = -1;
-
+      pos.column = -1;
+      pos.line = -1;
+      horiz = -1;
       filteredPaths = createVector(1);
-      pushToVector(&filteredPaths,
-                   newInfoBoardSemiFilled(nextHoriz, board.matrix, nextPos,
-                                          blankWordId));
+      pushToVector(&filteredPaths, newInfoBoardSemiFilled(horiz, board.matrix,
+                                                          pos, blankWordId));
       return filteredPaths;
     }
 
     /* length word */
-    lengthWord = shouldAddWord(board, prevPos, prevHoriz);
+    lengthWord = shouldAddWord(board, pos, horiz);
 
     /* not a word */
     if (lengthWord < 2) {
-      prevPos = nextPos;
-      prevHoriz = nextHoriz;
+      struct PosHoriz nextPosHoriz = getNextPosHoriz(board, pos, horiz);
+      pos = nextPosHoriz.pos;
+      horiz = nextPosHoriz.horiz;
       continue;
     }
 
@@ -131,19 +113,34 @@ struct Vector getAvailablePaths(struct Board board,
     for (i = 0; i <= unfilteredWords->last; i++) {
       struct WordInfo *infoWord = unfilteredWords->array[i];
       if (infoWord->available &&
-          canAddThisWord(board, infoWord->word, lengthWord, prevPos,
-                         prevHoriz)) {
+          canAddThisWord(board, infoWord->word, lengthWord, pos, horiz)) {
         struct WordId id;
         id.length = lengthWord;
         id.index = i;
-        pushToVector(&filteredPaths, newInfoBoardSemiFilled(
-                                         nextHoriz, board.matrix, nextPos, id));
+        pushToVector(&filteredPaths,
+                     newInfoBoardSemiFilled(horiz, board.matrix, pos, id));
       }
     }
 
     /* the vector can be empty */
     return filteredPaths;
   }
+}
+
+/* auxiliar functions */
+
+struct PosHoriz getNextPosHoriz(struct Board board, struct Position pos,
+                                char horiz) {
+  struct PosHoriz nextPosHoriz;
+  /* direction */
+  if (horiz) {
+    nextPosHoriz.horiz = 0;
+    nextPosHoriz.pos = pos;
+  } else {
+    nextPosHoriz.horiz = 1;
+    nextPosHoriz.pos = nextPositionBoard(board, pos);
+  }
+  return nextPosHoriz;
 }
 
 struct WordInfo *getInfoWordFromId(struct Vector wordsStructure,
@@ -160,5 +157,6 @@ struct InfoBoardSemiFilled *newInfoBoardSemiFilled(char horiz, char **matrix,
   ptr->horiz = horiz;
   ptr->matrix = matrix;
   ptr->pos = pos;
+  ptr->wordId = wordId;
   return ptr;
 }
