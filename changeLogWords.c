@@ -1,5 +1,4 @@
 #include "changeLogWords.h"
-#include <stdio.h>
 #include <stdlib.h>
 
 struct ChangeLogWords createChangeLogWords(int amntWords) {

@@ -14,28 +14,25 @@ EXECS = ep2
 CFLAGS = -Wall -ansi -pedantic -O0 -g #-O2
 CC = gcc
 
+SRC = $(wildcard *.c)
+OBJS = $(patsubst %.c, %.o, $(SRC))
+
 all: ep2
 
-run:
-	gdb ep2
+print:
+	echo $(OBJS)
 
-ep2: ep2.o board.o utils.o vector.o changeLogWords.o
-	$(CC) -o ep2 ep2.o board.o utils.o vector.o changeLogWords.o $(CFLAGS)
+run-clean:
+	clear
+	make
+	./ep2
+	make clean
 
-ep2.o: ep2.c
-	$(CC) -c ep2.c $(CFLAGS)
+ep2: $(OBJS)
+	$(CC) -o ep2 $(OBJS) $(CFLAGS)
 
-board.o: board.c board.h
-	$(CC) -c board.c $(CFLAGS)
-
-utils.o: utils.c utils.h
-	$(CC) -c utils.c $(CFLAGS)
-
-vector.o: vector.c vector.h
-	$(CC) -c vector.c $(CFLAGS)
-
-changeLogWords.o: changeLogWords.c changeLogWords.h
-	$(CC) -c changeLogWords.c $(CFLAGS)
+%.o: %.c %.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	-rm $(EXECS) *.o
