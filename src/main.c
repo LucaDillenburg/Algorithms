@@ -1,6 +1,6 @@
 #include "process.h"
-#include "specialStack.h"
-#include "vector.h"
+#include "specialStack/specialStack.h"
+#include "vector/vector.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,11 +42,11 @@ int main() {
         process(&curDataToProcess->board, curDataToProcess->wordsStructure,
                 curDataToProcess->amntWords);
 
-    printf("Instancia %d\n", instance + 1);
+    printf("Instance %d\n", instance + 1);
     if (hasSolution)
       printBoard(curDataToProcess->board);
     else
-      printf("nao ha solucao");
+      printf("there isnt any solution");
     printf("\n");
 
     /* ################################################################## */
@@ -68,6 +68,7 @@ struct DataToProcess *readDataToProcess() {
     return NULL;
 
   /* Amnt wordsStructure */
+  printf("Amount of words: ");
   scanf("%d", &dataToProcess->amntWords);
 
   /* Alloc wordsStructure */
@@ -81,12 +82,14 @@ struct DataToProcess *readDataToProcess() {
   }
 
   /* Populate wordsStructure */
+  printf("Now write the words: \n");
   for (i = 0; i < dataToProcess->amntWords; i++) {
     struct WordInfo *wordInfo =
         (struct WordInfo *)malloc(sizeof(struct WordInfo));
     unsigned long lengthWord;
 
     char *word = (char *)malloc(sizeof(char) * maxLengthWord);
+    printf("%d. ", i + 1);
     scanf("%s", word);
 
     wordInfo->available = 1;

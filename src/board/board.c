@@ -1,5 +1,5 @@
 #include "board.h"
-#include "utils.h"
+#include "../utils/utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,13 +8,18 @@ struct Board readBoard() {
   int i;
 
   /* Amnt Matrix */
-  scanf("%d %d", &board.lines, &board.columns);
+  printf("Number of board lines: ");
+  scanf("%d", &board.lines);
+  printf("Number of board columns: ");
+  scanf("%d", &board.columns);
+
   if (board.lines == 0 || board.columns == 0) {
     board.matrix = NULL;
     return board;
   }
 
   /* Alloc and Populate matrix */
+  printf("Now write the matrix cells:\n");
   board.matrix = (char **)malloc(sizeof(char *) * board.lines);
   for (i = 0; i < board.lines; i++) {
     int j;

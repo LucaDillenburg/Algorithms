@@ -1,7 +1,7 @@
 #include "specialStack.h"
-#include "process.h"
-#include "utils.h"
-#include "vector.h"
+#include "../process.h"
+#include "../utils/utils.h"
+#include "../vector/vector.h"
 #include <stdio.h>
 #include <stdlib.h>
 

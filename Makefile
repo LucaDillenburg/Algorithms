@@ -10,32 +10,37 @@
 # - o make verifica se houve modificacao comparando as datas de mofidicacao dos arquivos (nao o conteudo deles)
 # - if you don't make to stop after an error at one command put '-' before the command
 
-EXECS = ep2
-CFLAGS = -Wall -ansi -pedantic -O0 -g #-O2
+EXEC ?= main
+CFLAGS = -Wall -ansi -pedantic -O0 -g # if you just want to run, you can use: -O2
 CC = gcc
 
-SRC = $(wildcard *.c)
-OBJS = $(patsubst %.c, %.o, $(SRC))
+BUILD_DIR ?= ./build
+SRC_DIRS ?= ./src
 
-all: ep2
+SRCS := $(shell find $(SRC_DIRS) -name *.c)
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+
+INC_DIRS := $(shell find $(SRC_DIRS) -type d)
+INC_FLAGS := $(addprefix -I,$(INC_DIRS))
+
+$(BUILD_DIR)/$(EXEC): $(OBJS)
+	$(CC) $(OBJS) -o $@ $(LDFLAGS)
+
+$(BUILD_DIR)/%.c.o: %.c
+	$(MKDIR_P) $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 debug:
-	clear
 	make
-	gdb ./ep2
+	-gdb ./$(BUILD_DIR)/$(EXEC)
 	make clean
 
 run:
-	clear
 	make
-	-./ep2
+	-./$(BUILD_DIR)/$(EXEC)
 	make clean
 
-ep2: $(OBJS)
-	$(CC) -o ep2 $(OBJS) $(CFLAGS)
-
-%.o: %.c %.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
 clean:
-	-rm $(EXECS) *.o
+	-rm -r $(BUILD_DIR)
+
+MKDIR_P ?= mkdir -p

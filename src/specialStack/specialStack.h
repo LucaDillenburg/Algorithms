@@ -1,8 +1,8 @@
 #ifndef CHANGE_LOG_PATHS_H
 #define CHANGE_LOG_PATHS_H
 
-#include "board.h"
-#include "vector.h"
+#include "../board/board.h"
+#include "../vector/vector.h"
 
 /* Stack Related */
 

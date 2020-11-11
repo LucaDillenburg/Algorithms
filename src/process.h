@@ -1,10 +1,10 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
-#include "board.h"
-#include "specialStack.h"
-#include "utils.h"
-#include "vector.h"
+#include "board/board.h"
+#include "specialStack/specialStack.h"
+#include "utils/utils.h"
+#include "vector/vector.h"
 
 struct PosHoriz {
   struct Position pos;
