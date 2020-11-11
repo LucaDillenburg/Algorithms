@@ -55,7 +55,10 @@ char process(struct Board *finalBoard, struct Vector wordsStructure,
         momentaryBoard, wordsStructure, nextPosHoriz.horiz, nextPosHoriz.pos);
 
     if (vectorIsEmpty(possiblePathsFromCur)) {
+      freeVector(possiblePathsFromCur);
+      curInfoWord->available = 1;
       freeMatrix(momentaryBoard.matrix, momentaryBoard.lines);
+
       popItemInPathGroup(&stack, wordsStructure);
     } else {
       struct WordId *ptrWordId = malloc(sizeof(struct WordId));
@@ -63,8 +66,6 @@ char process(struct Board *finalBoard, struct Vector wordsStructure,
       popItemAndPushPathGroup(&stack, possiblePathsFromCur, ptrWordId,
                               momentaryBoard.matrix);
     }
-
-    freeVector(possiblePathsFromCur);
   }
 
   /* frees */

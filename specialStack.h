@@ -57,7 +57,7 @@ void popItemInPathGroup(struct SpecialStack *stack,
 
 /* auxiliar functions */
 void popAndFreeLastGroup(struct SpecialStack *stack);
-struct StackGroup *newEmptyLogGroup();
+struct StackGroup *newEmptyStackGroup();
 
 /* test */
 void printSpecialStack(struct SpecialStack stack);

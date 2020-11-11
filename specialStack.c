@@ -33,7 +33,7 @@ struct InfoBoardSemiFilled *getTopItem(struct SpecialStack stack) {
 
 void firstPushPathGroup(struct SpecialStack *stack,
                         struct Vector availableOptions, char **matrix) {
-  struct StackGroup *stackGroup = newEmptyLogGroup();
+  struct StackGroup *stackGroup = newEmptyStackGroup();
   stackGroup->selectedWords = createVector(stack->amntWords);
   stackGroup->availableOptions = availableOptions;
   stackGroup->allocatedMatrix = matrix;
@@ -47,36 +47,44 @@ void firstPushPathGroup(struct SpecialStack *stack,
 void popItemAndPushPathGroup(struct SpecialStack *stack,
                              struct Vector availableOptions,
                              struct WordId *selectedWord, char **matrix) {
-  struct StackGroup *curLogGroup,
-      *lastLogGroup = stack->groups.array[stack->groups.last];
-  popFromVector(&lastLogGroup->availableOptions);
+  struct StackGroup *curStackGroup,
+      *lastStackGroup = stack->groups.array[stack->groups.last];
+  struct InfoBoardSemiFilled *lastAvailableOption =
+      popFromVector(&lastStackGroup->availableOptions);
+  free(lastAvailableOption);
 
-  if (vectorIsEmpty(lastLogGroup->availableOptions))
-    freeMatrix(lastLogGroup->allocatedMatrix, stack->amntLines);
-  else
-    pushToVector(&stack->groups, newEmptyLogGroup());
+  if (vectorIsEmpty(lastStackGroup->availableOptions)) {
+    freeMatrix(lastStackGroup->allocatedMatrix, stack->amntLines);
+    freeVector(lastStackGroup->availableOptions);
+  } else {
+    struct StackGroup *newGroup = newEmptyStackGroup();
+    newGroup->selectedWords = createVector(stack->amntWords);
+    newGroup->allocatedMatrix = NULL;
+    pushToVector(&stack->groups, newGroup);
+  }
 
-  curLogGroup = stack->groups.array[stack->groups.last];
-  pushItemsToVector(&curLogGroup->availableOptions, availableOptions);
-  pushToVector(&curLogGroup->selectedWords, selectedWord);
-  curLogGroup->allocatedMatrix = matrix;
+  curStackGroup = stack->groups.array[stack->groups.last];
+  curStackGroup->availableOptions = availableOptions;
+  pushToVector(&curStackGroup->selectedWords, selectedWord);
+  curStackGroup->allocatedMatrix = matrix;
 }
 
 /* when there is no going forward with the last item */
 void popItemInPathGroup(struct SpecialStack *stack,
                         struct Vector wordsStructure) {
   char wasLastItem;
-  struct StackGroup *lastLogGroup = stack->groups.array[stack->groups.last];
+  struct StackGroup *lastStackGroup = stack->groups.array[stack->groups.last];
   struct InfoBoardSemiFilled *lastInfoBoardSemiFilled =
-      popFromVector(&lastLogGroup->availableOptions);
+      popFromVector(&lastStackGroup->availableOptions);
   free(lastInfoBoardSemiFilled);
 
-  wasLastItem = vectorIsEmpty(lastLogGroup->availableOptions);
+  wasLastItem = vectorIsEmpty(lastStackGroup->availableOptions);
   if (wasLastItem) {
-    while (!vectorIsEmpty(lastLogGroup->selectedWords)) {
-      struct WordId *curWordId = popFromVector(&lastLogGroup->selectedWords);
+    int i;
+    for (i = 0; i <= lastStackGroup->selectedWords.last; i++) {
+      struct WordId *curWordId = lastStackGroup->selectedWords.array[i];
       struct Vector *wordsSameLength = wordsStructure.array[curWordId->length];
-      struct WordInfo *curWordInfo = wordsSameLength->array[curWordId->length];
+      struct WordInfo *curWordInfo = wordsSameLength->array[curWordId->index];
       curWordInfo->available = 1;
     }
 
@@ -95,27 +103,27 @@ void freeSpecialStack(struct SpecialStack *stack) {
 /* ###################################################################### */
 
 void popAndFreeLastGroup(struct SpecialStack *stack) {
-  struct StackGroup *lastLogGroup = popFromVector(&stack->groups);
+  struct StackGroup *lastStackGroup = popFromVector(&stack->groups);
 
-  freeMatrix(lastLogGroup->allocatedMatrix, stack->amntLines);
+  freeMatrix(lastStackGroup->allocatedMatrix, stack->amntLines);
 
-  while (!vectorIsEmpty(lastLogGroup->availableOptions)) {
+  while (!vectorIsEmpty(lastStackGroup->availableOptions)) {
     struct InfoBoardSemiFilled *curInfoBoardSemiFilled =
-        popFromVector(&lastLogGroup->availableOptions);
+        popFromVector(&lastStackGroup->availableOptions);
     free(curInfoBoardSemiFilled);
   }
-  freeVector(lastLogGroup->availableOptions);
+  freeVector(lastStackGroup->availableOptions);
 
-  while (!vectorIsEmpty(lastLogGroup->selectedWords)) {
-    struct WordId *curWordId = popFromVector(&lastLogGroup->selectedWords);
+  while (!vectorIsEmpty(lastStackGroup->selectedWords)) {
+    struct WordId *curWordId = popFromVector(&lastStackGroup->selectedWords);
     free(curWordId);
   }
-  freeVector(lastLogGroup->selectedWords);
+  freeVector(lastStackGroup->selectedWords);
 
-  free(lastLogGroup);
+  free(lastStackGroup);
 }
 
-struct StackGroup *newEmptyLogGroup() {
+struct StackGroup *newEmptyStackGroup() {
   struct StackGroup *stackGroup = malloc(sizeof(struct StackGroup));
   return stackGroup;
 }
@@ -124,8 +132,9 @@ struct StackGroup *newEmptyLogGroup() {
 
 void printSpecialStack(struct SpecialStack stack) {
   int i;
+  printf("$$$$ TOP $$$$ \n");
   printf("-----------\n");
-  for (i = 0; i <= stack.groups.last; i++) {
+  for (i = stack.groups.last; i >= 0; i--) {
     struct StackGroup *curStackGroup = stack.groups.array[i];
     int j;
 
@@ -153,6 +162,8 @@ void printSpecialStack(struct SpecialStack stack) {
 
     printf("-----------\n");
   }
+  printf("$$$$ BOTTOM $$$$ \n");
+  printf("\n ");
 }
 
 void printWords(struct Vector wordsStructure) {
