@@ -19,11 +19,11 @@ void sortedInsert(int *array, int lastSorted, infoSortExec *infoSortExec,
     return;
 
   for (i = lastSorted + 1; i > insertIndex; i--) {
-    infoSortExec->amntSwitches++;
+    infoSortExec->amntMoves++;
     array[i] = array[i - 1];
   }
   array[insertIndex] = value;
-  infoSortExec->amntSwitches++;
+  infoSortExec->amntMoves++;
 }
 
 void insertionSort(int *array, int length, infoSortExec *infoSortExec) {

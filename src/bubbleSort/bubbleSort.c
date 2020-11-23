@@ -8,7 +8,7 @@ void bubbleSort(int *array, int length, infoSortExec *infoSortExec) {
       infoSortExec->amntComparisons++;
       if (array[j] < array[i]) {
         swap(&array[i], &array[j]);
-        infoSortExec->amntSwitches++;
+        infoSortExec->amntMoves++;
       }
     }
 }
