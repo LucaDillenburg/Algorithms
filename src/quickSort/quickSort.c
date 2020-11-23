@@ -8,7 +8,7 @@ void quickSort(int *array, int begin, int last, infoSortExec *infoSortExec) {
   if (begin + 1 == last) {
     infoSortExec->amntComparisons++;
     if (array[begin] > array[last]) {
-      infoSortExec->amntSwitches++;
+      infoSortExec->amntMoves++;
       swap(&array[begin], &array[last]);
     }
     return;
@@ -20,7 +20,7 @@ void quickSort(int *array, int begin, int last, infoSortExec *infoSortExec) {
   for (i = begin; i <= last; i++) {
     infoSortExec->amntComparisons++;
     if (array[i] <= pivot) {
-      infoSortExec->amntSwitches++;
+      infoSortExec->amntMoves++;
       swap(&array[i], &array[nextSmaller++]);
     }
   }

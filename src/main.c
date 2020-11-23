@@ -7,76 +7,123 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define QUICK_SORT 1
-#define MERGE_SORT 2
-#define INSERTION_SORT 3
-#define BUBBLE_SORT 4
+#define QUICK_SORT 0
+#define MERGE_SORT 1
+#define INSERTION_SORT 2
+#define BUBBLE_SORT 3
+
+#define AMOUNT_ALGORITHMS 4
 
 #define RANDOM_ARRAY 1
 #define CRESCENT_ORDERED_ARRAY 2
 #define DECRESCENT_ORDERED_ARRAY 3
 
-#define LOW_MAX_INT 50
-#define MEDIUM_MAX_INT 500
-#define HIGH_MAX_INT 5000
-#define MAX_INT LOW_MAX_INT
+#define MAX_INT 5000
+#define AMOUNT_ITERATIONS 50
 
+void printAlgorithmResult(char *algorithmName, double squareAvgComparisons,
+                          double avgComparisons, double squareAvgMoves,
+                          double avgMoves);
+infoSortExec sortAlgorithm(int *array, int length, int algorithm);
 int *newSpecificArray(int length, int arrayType);
 
 int main(int argc, char **argv) {
-  int i;
-  infoSortExec infoSortExec;
-  int *array;
+  int iteration, i;
+  double avgSquareComparisons[AMOUNT_ALGORITHMS],
+      avgComparisons[AMOUNT_ALGORITHMS], avgSquareMoves[AMOUNT_ALGORITHMS],
+      avgMoves[AMOUNT_ALGORITHMS];
 
   int length = atoi(argv[1]);
   int arrayType = atoi(argv[2]);
-  int sortAlgorithm = atoi(argv[3]);
 
-  printf("Length: %d, Type: %d, Algorithm: %d", length, arrayType,
-         sortAlgorithm);
+  for (i = 0; i < AMOUNT_ALGORITHMS; i++) {
+    avgSquareComparisons[i] = 0.0;
+    avgComparisons[i] = 0.0;
+    avgSquareMoves[i] = 0.0;
+    avgMoves[i] = 0.0;
+  }
+  srand(time(NULL));
 
-  array = newSpecificArray(length, arrayType);
-  printf("\nArray       : ");
-  for (i = 0; i < length; i++)
-    printf("%d ", array[i]);
+  printf("\nLength: %d, Type: %d", length, arrayType);
 
-  infoSortExec.amntComparisons = 0;
-  infoSortExec.amntSwitches = 0;
+  for (iteration = 0; iteration < AMOUNT_ITERATIONS; iteration++) {
+    int *array, iAlgorithm;
+    array = newSpecificArray(length, arrayType);
 
-  switch (sortAlgorithm) {
+    for (iAlgorithm = 0; iAlgorithm < AMOUNT_ALGORITHMS; iAlgorithm++) {
+      infoSortExec curInfoSortExec = sortAlgorithm(array, length, iAlgorithm);
+
+      avgComparisons[iAlgorithm] +=
+          (double)curInfoSortExec.amntComparisons / AMOUNT_ITERATIONS;
+      avgMoves[iAlgorithm] +=
+          (double)curInfoSortExec.amntMoves / AMOUNT_ITERATIONS;
+      avgSquareComparisons[iAlgorithm] +=
+          (double)curInfoSortExec.amntComparisons *
+          curInfoSortExec.amntComparisons / AMOUNT_ITERATIONS;
+      avgSquareMoves[iAlgorithm] += (double)curInfoSortExec.amntMoves *
+                                    curInfoSortExec.amntMoves /
+                                    AMOUNT_ITERATIONS;
+    }
+
+    free(array);
+  }
+
+  printf("\n\nResult:");
+  printAlgorithmResult("Quick Sort", avgSquareComparisons[QUICK_SORT],
+                       avgComparisons[QUICK_SORT], avgSquareMoves[QUICK_SORT],
+                       avgMoves[QUICK_SORT]);
+  printAlgorithmResult("Merge Sort", avgSquareComparisons[MERGE_SORT],
+                       avgComparisons[MERGE_SORT], avgSquareMoves[MERGE_SORT],
+                       avgMoves[MERGE_SORT]);
+  printAlgorithmResult("Insert Sort", avgSquareComparisons[INSERTION_SORT],
+                       avgComparisons[INSERTION_SORT],
+                       avgSquareMoves[INSERTION_SORT],
+                       avgMoves[INSERTION_SORT]);
+  printAlgorithmResult("Bubble Sort", avgSquareComparisons[BUBBLE_SORT],
+                       avgComparisons[BUBBLE_SORT], avgSquareMoves[BUBBLE_SORT],
+                       avgMoves[BUBBLE_SORT]);
+  printf("\n\n");
+
+  return 0;
+}
+
+void printAlgorithmResult(char *algorithmName, double squareAvgComparisons,
+                          double avgComparisons, double squareAvgMoves,
+                          double avgMoves) {
+  double sdComparisons = squareAvgComparisons - avgComparisons * avgComparisons;
+  double sdMoves = squareAvgMoves - avgMoves * avgMoves;
+  printf("\n\\textbf{%s} & %.2f & %.2f & %.2f & %.2f \\\\", algorithmName,
+         avgComparisons, sdComparisons, avgMoves, sdMoves);
+}
+
+infoSortExec sortAlgorithm(int *array, int length, int algorithm) {
+  infoSortExec infoSortExec = createInfoSortExec();
+  int *copy = copyOf(array, 0, length);
+
+  switch (algorithm) {
   case QUICK_SORT:
-    quickSort(array, 0, length - 1, &infoSortExec);
+    quickSort(copy, 0, length - 1, &infoSortExec);
     break;
   case MERGE_SORT:
-    array = mergeSort(array, length, &infoSortExec);
+    copy = mergeSort(copy, length, &infoSortExec);
     break;
   case INSERTION_SORT:
-    insertionSort(array, length, &infoSortExec);
+    insertionSort(copy, length, &infoSortExec);
     break;
   case BUBBLE_SORT:
-    bubbleSort(array, length, &infoSortExec);
+    bubbleSort(copy, length, &infoSortExec);
     break;
   }
 
-  printf("\n\nSorted Array: ");
-  for (i = 0; i < length; i++)
-    printf("%d ", array[i]);
+  free(copy);
 
-  printf("\n\nAmnt Comparisons: %d", infoSortExec.amntComparisons);
-  printf("\nAmnt Switches: %d\n", infoSortExec.amntSwitches);
-
-  free(array);
-
-  return 0;
+  return infoSortExec;
 }
 
 int *newSpecificArray(int length, int arrayType) {
   int *array = newIntArray(length);
   int i;
 
-  printf("\nMAX_INT: %d\n", MAX_INT);
-
-  srand(time(NULL));
   for (i = 0; i < length; i++)
     array[i] = (int)randBetween(0, MAX_INT + 1);
 
