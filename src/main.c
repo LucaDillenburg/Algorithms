@@ -3,7 +3,6 @@
 #include "mergeSort/mergeSort.h"
 #include "quickSort/quickSort.h"
 #include "utils.h"
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
