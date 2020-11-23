@@ -11,7 +11,8 @@
 # - if you don't make to stop after an error at one command put '-' before the command
 
 EXEC ?= main
-CFLAGS = -Wall -ansi -pedantic -O0 -g # if you just want to run, you can use: -O2
+CFLAGS = -Wall -ansi -pedantic -O0 -g -lm # if you just want to run, you can use: -O2
+LDFLAGS = -lm
 CC = gcc
 
 BUILD_DIR ?= ./build
@@ -33,12 +34,10 @@ $(BUILD_DIR)/%.c.o: %.c
 debug:
 	make
 	-gdb ./$(BUILD_DIR)/$(EXEC)
-	make clean
 
 run:
 	make
 	-./$(BUILD_DIR)/$(EXEC)
-	make clean
 
 clean:
 	-rm -r $(BUILD_DIR)

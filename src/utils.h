@@ -9,6 +9,6 @@ typedef struct InfoSortExec {
 infoSortExec createInfoSortExec();
 void swap(int *a, int *b);
 int *newIntArray(int length);
-int *newArrayOf(int *array, int begin, int last);
+double randBetween(double min, double max);
 
 #endif

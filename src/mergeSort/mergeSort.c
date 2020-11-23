@@ -1,5 +1,15 @@
 #include "mergeSort.h"
+#include <stdio.h>
 #include <stdlib.h>
+
+int *newArrayOf(int *array, int begin, int last) {
+  int *ret = newIntArray(last - begin + 1);
+  int i;
+  for (i = begin; i <= last; i++) {
+    ret[i - begin] = array[i];
+  }
+  return ret;
+}
 
 int *mergeSort(int *array, int lengthArray, infoSortExec *infoSortExec) {
   int middle, lengthLeft, lengthRight, *left, *right, *sortedLeft, *sortedRight,
@@ -10,17 +20,22 @@ int *mergeSort(int *array, int lengthArray, infoSortExec *infoSortExec) {
 
   middle = lengthArray / 2;
 
-  lengthLeft = middle - 1;
-  lengthRight = lengthArray - 1;
-  left = newArrayOf(array, 0, lengthLeft);
-  right = newArrayOf(array, middle, lengthRight);
+  left = newArrayOf(array, 0, middle);
+  right = newArrayOf(array, middle, lengthArray);
+  lengthLeft = middle;
+  lengthRight = lengthArray - middle;
   infoSortExec->amntSwitches += lengthLeft + lengthRight;
 
   sortedLeft = mergeSort(left, lengthLeft, infoSortExec);
   sortedRight = mergeSort(right, lengthRight, infoSortExec);
 
-  free(left);
-  free(right);
+  printf("\n\nlength: %d", lengthArray);
+  printf("\nSorted Array: ");
+  for (i = 0; i < lengthLeft; i++)
+    printf("%d ", sortedLeft[i]);
+  printf("\nSorted Array: ");
+  for (i = 0; i < lengthRight; i++)
+    printf("%d ", array[i]);
 
   sorted = newIntArray(lengthArray);
   iSorted = 0, i = 0, j = 0;
@@ -48,8 +63,8 @@ int *mergeSort(int *array, int lengthArray, infoSortExec *infoSortExec) {
     sorted[iSorted++] = sortedRight[j++];
   }
 
-  free(sortedLeft);
-  free(sortedRight);
+  free(left);
+  free(right);
 
   return sorted;
 }

@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 infoSortExec createInfoSortExec() {
@@ -16,11 +17,9 @@ void swap(int *a, int *b) {
 
 int *newIntArray(int length) { return (int *)malloc(sizeof(int) * length); }
 
-int *newArrayOf(int *array, int begin, int last) {
-  int *ret = newIntArray(last - begin + 1);
-  int i;
-  for (i = begin; i <= last; i++) {
-    ret[i - begin] = array[i];
-  }
-  return ret;
+double randBetween(double min, double max) {
+  double r = (double)rand();
+  double div = r / RAND_MAX;
+  double result = min - div * min + div * max;
+  return result;
 }
