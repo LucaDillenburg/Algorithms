@@ -1,5 +1,5 @@
-#ifndef _UTILS_H
-#define _UTILS_H
+#ifndef _HASH_TABLE_H
+#define _HASH_TABLE_H
 
 #include "list.h"
 
