@@ -32,12 +32,9 @@ void pushToList(list *list, void *elem) {
   }
 }
 
-void printList(list list, void (*printElem)(void *)) {
+void forEachList(list list, void (*function)(int, void *)) {
   listNode *cur_node = list.first_node;
   int i;
-  for (i = 0; cur_node != NULL; i++, cur_node = cur_node->next) {
-    printf("%d: ", i);
-    printElem(cur_node->info);
-    printf("\n");
-  }
+  for (i = 0; cur_node != NULL; i++, cur_node = cur_node->next)
+    function(i, cur_node->info);
 }

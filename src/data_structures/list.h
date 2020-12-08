@@ -16,6 +16,6 @@ void freeList(list *list, void (*freeItem)(void *));
 
 void pushToList(struct list *list, void *elem);
 
-void printList(list list, void (*printElem)(void *));
+void forEachList(list list, void (*function)(int, void *));
 
 #endif

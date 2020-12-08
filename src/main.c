@@ -3,13 +3,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main() {
+void printEachStr(int i, char *str) { printf("%d: %s\n", i, str); }
+
+void testList() {
   struct list *list = newList();
   pushToList(list, newString("This is the first one"));
   pushToList(list, newString("That's the SECOND"));
   pushToList(list, newString("Now the THIRD"));
   pushToList(list, newString("4TH"));
   pushToList(list, newString("THAT'S THE LAST ONE (the 5th)"));
-  printList(*list, (void (*)(void *))printString);
+  forEachList(*list, (void (*)(int, void *))printEachStr);
+}
+
+int main() {
+  testList();
   return 0;
 }

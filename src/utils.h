@@ -4,7 +4,6 @@
 #include <stdio.h>
 
 char *newString(char *str);
-void printString(char *str);
 
 char *nextWordInFile(FILE *file);
 int strhashing(char *str);
