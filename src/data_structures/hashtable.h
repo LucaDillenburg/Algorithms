@@ -7,7 +7,7 @@
 
 typedef struct hashtable {
   struct list *array;
-  int (*hashingFunction)(void *);
+  unsigned int (*hashingFunction)(void *);
   char (*keyIsEqualTo)(void *, void *);
 } hashtable;
 
@@ -16,7 +16,7 @@ typedef struct {
   void *value;
 } hashcell;
 
-hashtable createHashTable(int (*hashingFunction)(void *),
+hashtable createHashTable(unsigned int (*hashingFunction)(void *),
                           char (*compareFunction)(void *, void *));
 void freeInsideHashTable(struct hashtable table, void (*freeKey)(void *),
                          void (*freeItem)(void *));

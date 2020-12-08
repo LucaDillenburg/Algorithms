@@ -3,7 +3,9 @@
 
 #include <stdio.h>
 
+#define MAX_LENGTH_WORD 100
+
 char *nextWordInFile(FILE *file);
-int strhashing(char *str);
+unsigned int hashForString(char *str);
 
 #endif

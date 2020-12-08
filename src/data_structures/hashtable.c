@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct hashtable createHashTable(int (*hashingFunction)(void *),
+struct hashtable createHashTable(unsigned int (*hashingFunction)(void *),
                                  char (*keyIsEqualTo)(void *, void *)) {
   struct hashtable created_hash;
   int i;
@@ -39,7 +39,7 @@ void freeInsideHashTable(struct hashtable table, void (*freeKey)(void *),
 }
 
 void pushToHashTable(struct hashtable table, void *key, void *value) {
-  int index = (*table.hashingFunction)(key) % HASH_TABLE_LENGTH;
+  unsigned int index = (*table.hashingFunction)(key) % HASH_TABLE_LENGTH;
 
   printf("Index: %d\n", index);
 
@@ -50,7 +50,7 @@ void pushToHashTable(struct hashtable table, void *key, void *value) {
 }
 
 void *getValueFromKey(struct hashtable table, void *key) {
-  int index = (*table.hashingFunction)(key) % HASH_TABLE_LENGTH;
+  unsigned int index = (*table.hashingFunction)(key) % HASH_TABLE_LENGTH;
   struct list cells_list = table.array[index];
   for (goToFirstNode(&cells_list); currentNodeExist(&cells_list);
        goToNextNode(&cells_list)) {

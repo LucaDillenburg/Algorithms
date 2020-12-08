@@ -1,5 +1,6 @@
 #include "tests.h"
 #include "../data_structures/hashtable.h"
+#include "../utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,7 +42,7 @@ void testList() {
 
 /* ######################### TEST HASHTABLE ######################### */
 
-int fakeHashingFunction(char *str) {
+unsigned int fakeHashingFunction(char *str) {
   if (!strcmp(str, "Hello World"))
     return 1;
   if (!strcmp(str, "str"))
@@ -84,7 +85,7 @@ void printHashTable(struct hashtable table) {
 
 void testHashTable() {
   struct hashtable table =
-      createHashTable((int (*)(void *))fakeHashingFunction,
+      createHashTable((unsigned int (*)(void *))fakeHashingFunction,
                       (char (*)(void *, void *))stringIsEqualTo);
 
   pushToHashTable(table, newString("Hello World"), newInt(1));
@@ -108,4 +109,17 @@ void testHashTable() {
 
   freeInsideHashTable(table, (void (*)(void *))freeString,
                       (void (*)(void *))freeIntPtr);
+}
+
+/* ######################### GET WORD FROM FILE ######################### */
+
+void testGetWord() {
+  FILE *file = fopen("./src/tests/file", "r");
+  while (1) {
+    char *str = nextWordInFile(file);
+    if (str == NULL)
+      break;
+    printf("'%s'\n", str);
+    free(str);
+  }
 }
