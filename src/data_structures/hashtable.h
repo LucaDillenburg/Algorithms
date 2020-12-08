@@ -3,10 +3,12 @@
 
 #include "list.h"
 
-typedef struct {
+#define HASH_TABLE_LENGTH 500
+
+typedef struct hashtable {
   struct list *array;
   int (*hashingFunction)(void *);
-  int (*compareFunction)(void *, void *);
+  char (*keyIsEqualTo)(void *, void *);
 } hashtable;
 
 typedef struct {
@@ -15,9 +17,12 @@ typedef struct {
 } hashcell;
 
 hashtable createHashTable(int (*hashingFunction)(void *),
-                          int (*compareFunction)(void *, void *));
-void pushToHashTable(hashtable table, void *key, void *value);
-void *getValueFromKey(hashtable table, void *key);
-void freeHashTable(hashtable list);
+                          char (*compareFunction)(void *, void *));
+void freeInsideHashTable(struct hashtable table, void (*freeKey)(void *),
+                         void (*freeItem)(void *));
+
+void pushToHashTable(struct hashtable table, void *key, void *value);
+void *getValueFromKey(struct hashtable table,
+                      void *key); /* returns NULL if the Key doesn't exist */
 
 #endif

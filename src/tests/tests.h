@@ -1,12 +1,8 @@
-#ifndef _TESTS
-#define _TESTS
+#ifndef _MAIN_TESTS_H
+#define _MAIN_TESTS_H
 
 #include "../data_structures/hashtable.h"
 #include "../data_structures/list.h"
-#include "utils.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 char *newString(char *str);
 void printStrList(struct list list);

@@ -1,6 +1,5 @@
 #include "tests.h"
 #include "../data_structures/hashtable.h"
-#include "../data_structures/list.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,7 +41,16 @@ void testList() {
 
 /* ######################### TEST HASHTABLE ######################### */
 
-int fakeHashingFunction(char *str) { return 1; }
+int fakeHashingFunction(char *str) {
+  if (!strcmp(str, "Hello World"))
+    return 1;
+  if (!strcmp(str, "str"))
+    return 6;
+  if (!strcmp(str, "Hello Luca"))
+    return 5;
+  return 101;
+}
+char stringIsEqualTo(char *str1, char *str2) { return !strcmp(str1, str2); }
 
 void freeString(char *str) { free(str); }
 void freeIntPtr(int *d) { free(d); }
@@ -62,26 +70,41 @@ void printCellsList(struct list cells_list) {
 
 void printHashTable(struct hashtable table) {
   int i;
+  printf("Printing Hash...\n");
   for (i = 0; i < HASH_TABLE_LENGTH; i++) {
     struct list cur_list = table.array[i];
     if (cur_list.first_node != NULL) {
       printf("%d: ", i);
       printCellsList(cur_list);
+      printf("\n");
     }
   }
+  printf("\n");
 }
 
 void testHashTable() {
-  /* TODO */
-  struct hashtable table = createHashTable((int (*)(void *))fakeHashingFunction,
-                                           (char (*)(void *, void *))strcmp);
+  struct hashtable table =
+      createHashTable((int (*)(void *))fakeHashingFunction,
+                      (char (*)(void *, void *))stringIsEqualTo);
 
   pushToHashTable(table, newString("Hello World"), newInt(1));
   pushToHashTable(table, newString("Hello Luca"), newInt(2));
   pushToHashTable(table, newString("My name is Luca"), newInt(3));
   pushToHashTable(table, newString("I want coffee"), newInt(4));
+  pushToHashTable(table, newString("I am the best"), newInt(10));
 
   printHashTable(table);
+
+  printf("\n\nValue: %d\n",
+         *(int *)getValueFromKey(table, newString("I want coffee")));
+  printf("Value: %d\n",
+         *(int *)getValueFromKey(table, newString("My name is Luca")));
+  printf("Value: %d\n",
+         *(int *)getValueFromKey(table, newString("I am the best")));
+  if (getValueFromKey(table, newString("str")) != NULL)
+    printf("NOT NULLL!!! WRONGGG!");
+  else
+    printf("null, fine");
 
   freeInsideHashTable(table, (void (*)(void *))freeString,
                       (void (*)(void *))freeIntPtr);
