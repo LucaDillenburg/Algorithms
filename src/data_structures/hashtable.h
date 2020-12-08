@@ -3,7 +3,7 @@
 
 #include "list.h"
 
-#define HASH_TABLE_LENGTH 500
+#define HASH_TABLE_LENGTH 25000
 
 typedef struct hashtable {
   struct list *array;
@@ -16,8 +16,8 @@ typedef struct {
   void *value;
 } hashcell;
 
-hashtable createHashTable(unsigned int (*hashingFunction)(void *),
-                          char (*compareFunction)(void *, void *));
+struct hashtable createHashTable(unsigned int (*hashingFunction)(void *),
+                                 char (*keyIsEqualTo)(void *, void *));
 void freeInsideHashTable(struct hashtable table, void (*freeKey)(void *),
                          void (*freeItem)(void *));
 

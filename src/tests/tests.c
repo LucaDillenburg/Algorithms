@@ -51,7 +51,6 @@ unsigned int fakeHashingFunction(char *str) {
     return 5;
   return 101;
 }
-char stringIsEqualTo(char *str1, char *str2) { return !strcmp(str1, str2); }
 
 void freeString(char *str) { free(str); }
 void freeIntPtr(int *d) { free(d); }
@@ -116,7 +115,8 @@ void testHashTable() {
 void testGetWord() {
   FILE *file = fopen("./src/tests/file", "r");
   while (1) {
-    char *str = nextWordInFile(file);
+    int _ = 0;
+    char *str = nextWordInFile(file, &_);
     if (str == NULL)
       break;
     printf("'%s'\n", str);

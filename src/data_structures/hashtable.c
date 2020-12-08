@@ -40,9 +40,6 @@ void freeInsideHashTable(struct hashtable table, void (*freeKey)(void *),
 
 void pushToHashTable(struct hashtable table, void *key, void *value) {
   unsigned int index = (*table.hashingFunction)(key) % HASH_TABLE_LENGTH;
-
-  printf("Index: %d\n", index);
-
   hashcell *cell = (hashcell *)malloc(sizeof(hashcell));
   cell->key = key;
   cell->value = value;

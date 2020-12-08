@@ -1,5 +1,6 @@
 #include "utils.h"
 #include <stdlib.h>
+#include <string.h>
 
 char isEndOfWord(char c, int length_before_char) {
   if (c >= 'a' && c <= 'z')
@@ -11,7 +12,7 @@ char isEndOfWord(char c, int length_before_char) {
   return 1;
 }
 
-char *nextWordInFile(FILE *file) {
+char *nextWordInFile(FILE *file, int *next_word_line_index) {
   char *buff = (char *)malloc(sizeof(char) * MAX_LENGTH_WORD);
   int length = 0;
 
@@ -23,6 +24,8 @@ char *nextWordInFile(FILE *file) {
       break;
     }
     if (isEndOfWord(c, length)) {
+      if (c == '\n')
+        (*next_word_line_index)++;
       if (length > 0)
         break;
       continue;
@@ -48,3 +51,5 @@ unsigned int hashForString(char *str) {
     hash = hash * HASH_MULTIPLIER + (int)str[i];
   return hash;
 }
+
+char stringIsEqualTo(char *str1, char *str2) { return !strcmp(str1, str2); }
