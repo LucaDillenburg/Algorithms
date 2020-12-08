@@ -9,11 +9,13 @@ list *newList() {
   return new_list;
 }
 
-void freeList(list *list, void (*freeItem)(void *)) {
+void freeList(list *list, void (*freeItem)(void *, void *args), void *args) {
   listNode *cur_node = list->first_node;
   while (cur_node != NULL) {
-    freeItem(cur_node->info);
+    listNode *next = cur_node->next;
+    freeItem(cur_node->info, args);
     free(cur_node);
+    cur_node = next;
   }
   free(list);
 }

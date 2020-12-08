@@ -12,7 +12,7 @@ typedef struct listNode {
 } listNode;
 
 struct list *newList();
-void freeList(list *list, void (*freeItem)(void *));
+void freeList(list *list, void (*freeItem)(void *, void *args), void *args);
 
 void pushToList(struct list *list, void *elem);
 
