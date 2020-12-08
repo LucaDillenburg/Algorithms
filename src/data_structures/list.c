@@ -2,22 +2,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-list *newList() {
-  list *new_list = (list *)malloc(sizeof(list));
-  new_list->first_node = NULL;
-  new_list->last_node = NULL;
-  return new_list;
+list createList() {
+  list created_list;
+  created_list.first_node = NULL;
+  created_list.last_node = NULL;
+  created_list.current_node = NULL;
+  return created_list;
 }
 
-void freeList(list *list, void (*freeItem)(void *, void *args), void *args) {
-  listNode *cur_node = list->first_node;
+void freeInsideList(list list) {
+  listNode *cur_node = list.first_node;
   while (cur_node != NULL) {
     listNode *next = cur_node->next;
-    freeItem(cur_node->info, args);
     free(cur_node);
     cur_node = next;
   }
-  free(list);
 }
 
 void pushToList(list *list, void *elem) {
@@ -34,9 +33,9 @@ void pushToList(list *list, void *elem) {
   }
 }
 
-void forEachList(list list, void (*function)(int, void *)) {
-  listNode *cur_node = list.first_node;
-  int i;
-  for (i = 0; cur_node != NULL; i++, cur_node = cur_node->next)
-    function(i, cur_node->info);
+void goToFirstNode(struct list *list) { list->current_node = list->first_node; }
+void goToNextNode(struct list *list) {
+  list->current_node = list->current_node->next;
 }
+char currentNodeExist(struct list *list) { return list->current_node != NULL; }
+void *getCurrentInfo(struct list list) { return list.current_node->info; }
