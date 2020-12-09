@@ -128,22 +128,51 @@ void testGetWord() {
 
 /* ######################### VECTOR ######################### */
 
-void testVector() {
+void printVectorIntPtr(struct vector vector) {
   int i;
-  struct vector vector = createVector(5);
-  pushToVector(&vector, newInt(1));
-  pushToVector(&vector, newInt(2));
-  pushToVector(&vector, newInt(3));
-  pushToVector(&vector, newInt(4));
-  pushToVector(&vector, newInt(5));
-  pushToVector(&vector, newInt(6));
-  pushToVector(&vector, newInt(7));
-  pushToVector(&vector, newInt(8));
-  pushToVector(&vector, newInt(9));
-  pushToVector(&vector, newInt(10));
-
+  printf("length: %2d, last: %2d | ", vector.length, vector.last);
   for (i = 0; i <= vector.last; i++)
     printf("%d ", *(int *)vector.array[i]);
+  printf("\n");
+}
+
+void testVector() {
+  struct vector vector = createVector(2);
+
+  pushToVector(&vector, newInt(1));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(2));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(3));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(4));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(5));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(6));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(7));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(8));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(9));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(10));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(10));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(10));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(10));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(10));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(10));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(10));
+  printVectorIntPtr(vector);
+  pushToVector(&vector, newInt(10));
+  printVectorIntPtr(vector);
 
   freeInsideVector(vector);
 }
