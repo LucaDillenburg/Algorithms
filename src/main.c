@@ -32,7 +32,7 @@ int main() {
   struct vector word_cells_ptrs = createVector(AVG_WORDS);
 
   char file_name[MAX_LENGTH_FILE_NAME];
-  scanf("%s", file_name);
+  scanf(" %[^\n]", file_name);
 
   file = fopen(file_name, "r");
   if (file == NULL) {
