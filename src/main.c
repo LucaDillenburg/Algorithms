@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_LENGTH_FILE_NAME 100
+#define MAX_LENGTH_FILE_NAME 200
 #define AVG_WORDS 2000
 
 typedef struct wordOccurance {
@@ -28,13 +28,18 @@ int main() {
   struct hashtable table =
       createHashTable((unsigned int (*)(void *))hashForString,
                       (char (*)(void *, void *))stringIsEqualTo);
-  int cur_line = 0;
+  int cur_line = 1;
   struct vector word_cells_ptrs = createVector(AVG_WORDS);
 
   char file_name[MAX_LENGTH_FILE_NAME];
   scanf("%s", file_name);
 
   file = fopen(file_name, "r");
+  if (file == NULL) {
+    printf("Error: couldn't open file '%s'!\n", file_name);
+    return 1;
+  }
+
   while (1) {
     int next_word_line_index = cur_line;
     char *str = nextWordInFile(file, &next_word_line_index);
@@ -118,38 +123,6 @@ void freeListOccurances(struct list *list) {
 
 /* PRINTING */
 
-void printHashTable(struct hashtable table) {
-  int i;
-  printf("Printing Hash...\n");
-  for (i = 0; i < HASH_TABLE_LENGTH; i++) {
-    struct list cur_list = table.array[i];
-    if (cur_list.first_node != NULL) {
-      printf("%d: ", i);
-
-      for (goToFirstNode(&cur_list); currentNodeExist(&cur_list);
-           goToNextNode(&cur_list)) {
-        hashcell *cell = (hashcell *)getCurrentInfo(cur_list);
-        struct list *list_of_occurances = (struct list *)cell->value;
-
-        printf("[ %s: ", (char *)cell->key);
-
-        for (goToFirstNode(list_of_occurances);
-             currentNodeExist(list_of_occurances);
-             goToNextNode(list_of_occurances)) {
-          struct wordOccurance *occ =
-              (struct wordOccurance *)getCurrentInfo(*list_of_occurances);
-          printf("%d(%d) ", occ->line, occ->amount);
-        }
-
-        printf("] ");
-      }
-
-      printf("\n");
-    }
-  }
-  printf("\n");
-}
-
 void printWords(struct vector word_cells_ptrs) {
   int i;
   for (i = 0; i <= word_cells_ptrs.last; i++) {
@@ -163,7 +136,10 @@ void printWords(struct vector word_cells_ptrs) {
          goToNextNode(list_of_occurances)) {
       struct wordOccurance *cur_occurance =
           (struct wordOccurance *)getCurrentInfo(*list_of_occurances);
-      printf("%d(%d) ", cur_occurance->line, cur_occurance->amount);
+      if (cur_occurance->amount == 1)
+        printf("%d ", cur_occurance->line);
+      else
+        printf("%d(%d) ", cur_occurance->line, cur_occurance->amount);
     }
 
     printf("\n");
