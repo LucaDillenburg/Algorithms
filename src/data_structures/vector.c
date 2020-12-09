@@ -15,6 +15,7 @@ struct vector createVector(int length) {
 void increaseVector(struct vector *vector, int newLength) {
   void **newArray = (void **)malloc(sizeof(void *) * newLength);
   int i;
+  vector->length = newLength;
   for (i = 0; i <= vector->last; i++)
     newArray[i] = vector->array[i];
   free(vector->array);
