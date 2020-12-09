@@ -54,7 +54,7 @@ unsigned int fakeHashingFunction(char *str) {
   return 101;
 }
 
-void freeString(char *str) { free(str); }
+void freeStringTest(char *str) { free(str); }
 void freeIntPtr(int *d) { free(d); }
 int *newInt(int d) {
   int *ptr = (int *)malloc(sizeof(int));
@@ -70,7 +70,7 @@ void printCellsList(struct list cells_list) {
   }
 }
 
-void printHashTable(struct hashtable table) {
+void printHashTableTest(struct hashtable table) {
   int i;
   printf("Printing Hash...\n");
   for (i = 0; i < HASH_TABLE_LENGTH; i++) {
@@ -95,7 +95,7 @@ void testHashTable() {
   pushToHashTable(table, newString("I want coffee"), newInt(4));
   pushToHashTable(table, newString("I am the best"), newInt(10));
 
-  printHashTable(table);
+  printHashTableTest(table);
 
   printf("\n\nValue: %d\n",
          *(int *)getValueFromKey(table, newString("I want coffee")));
@@ -108,7 +108,7 @@ void testHashTable() {
   else
     printf("null, fine");
 
-  freeInsideHashTable(table, (void (*)(void *))freeString,
+  freeInsideHashTable(table, (void (*)(void *))freeStringTest,
                       (void (*)(void *))freeIntPtr);
 }
 
@@ -154,7 +154,6 @@ void printWordsTest(struct vector word_cells_ptrs) {
   int i;
   for (i = 0; i <= word_cells_ptrs.last; i++) {
     struct hashcell *cur_cell = word_cells_ptrs.array[i];
-    struct list *list_of_occurances;
     printf("%s\n", (char *)cur_cell->key);
   }
 }
