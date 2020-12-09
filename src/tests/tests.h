@@ -7,5 +7,7 @@
 void testList();
 void testHashTable();
 void testGetWord();
+void testVector();
+void testSort();
 
 #endif

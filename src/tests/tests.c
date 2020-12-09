@@ -1,5 +1,7 @@
 #include "tests.h"
 #include "../data_structures/hashtable.h"
+#include "../data_structures/list.h"
+#include "../data_structures/vector.h"
 #include "../utils.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -122,4 +124,61 @@ void testGetWord() {
     printf("'%s'\n", str);
     free(str);
   }
+}
+
+/* ######################### VECTOR ######################### */
+
+void testVector() {
+  int i;
+  struct vector vector = createVector(5);
+  pushToVector(&vector, newInt(1));
+  pushToVector(&vector, newInt(2));
+  pushToVector(&vector, newInt(3));
+  pushToVector(&vector, newInt(4));
+  pushToVector(&vector, newInt(5));
+  pushToVector(&vector, newInt(6));
+  pushToVector(&vector, newInt(7));
+  pushToVector(&vector, newInt(8));
+  pushToVector(&vector, newInt(9));
+  pushToVector(&vector, newInt(10));
+
+  for (i = 0; i <= vector.last; i++)
+    printf("%d ", *(int *)vector.array[i]);
+
+  freeInsideVector(vector);
+}
+
+/* ######################### SORT ######################### */
+
+void printWordsTest(struct vector word_cells_ptrs) {
+  int i;
+  for (i = 0; i <= word_cells_ptrs.last; i++) {
+    struct hashcell *cur_cell = word_cells_ptrs.array[i];
+    struct list *list_of_occurances;
+    printf("%s\n", (char *)cur_cell->key);
+  }
+}
+
+struct hashcell *newHashCell(char *key) {
+  struct hashcell *cell = (struct hashcell *)malloc(sizeof(struct hashcell));
+  cell->key = key;
+  cell->value = (struct list *)malloc(sizeof(struct list));
+  return cell;
+}
+
+void testSort() {
+  struct vector vector = createVector(5);
+  pushToVector(&vector, newHashCell("ola"));
+  pushToVector(&vector, newHashCell("eu"));
+  pushToVector(&vector, newHashCell("tres"));
+  pushToVector(&vector, newHashCell("anos"));
+  pushToVector(&vector, newHashCell("eh"));
+  pushToVector(&vector, newHashCell("muita"));
+  pushToVector(&vector, newHashCell("coisa"));
+  pushToVector(&vector, newHashCell("ABC"));
+  pushToVector(&vector, newHashCell("ABB"));
+  pushToVector(&vector, newHashCell("ABA"));
+
+  sortCells((struct hashcell **)vector.array, vector.last);
+  printWordsTest(vector);
 }
