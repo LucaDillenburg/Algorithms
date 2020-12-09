@@ -38,12 +38,14 @@ void freeInsideHashTable(struct hashtable table, void (*freeKey)(void *),
   }
 }
 
-void pushToHashTable(struct hashtable table, void *key, void *value) {
+struct hashcell *pushToHashTable(struct hashtable table, void *key,
+                                 void *value) {
   unsigned int index = (*table.hashingFunction)(key) % HASH_TABLE_LENGTH;
-  hashcell *cell = (hashcell *)malloc(sizeof(hashcell));
+  struct hashcell *cell = (struct hashcell *)malloc(sizeof(struct hashcell));
   cell->key = key;
   cell->value = value;
   pushToList(&table.array[index], cell);
+  return cell;
 }
 
 void *getValueFromKey(struct hashtable table, void *key) {

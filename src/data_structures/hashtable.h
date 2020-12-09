@@ -11,7 +11,7 @@ typedef struct hashtable {
   char (*keyIsEqualTo)(void *, void *);
 } hashtable;
 
-typedef struct {
+typedef struct hashcell {
   void *key;
   void *value;
 } hashcell;
@@ -21,7 +21,8 @@ struct hashtable createHashTable(unsigned int (*hashingFunction)(void *),
 void freeInsideHashTable(struct hashtable table, void (*freeKey)(void *),
                          void (*freeItem)(void *));
 
-void pushToHashTable(struct hashtable table, void *key, void *value);
+struct hashcell *pushToHashTable(struct hashtable table, void *key,
+                                 void *value);
 void *getValueFromKey(struct hashtable table,
                       void *key); /* returns NULL if the Key doesn't exist */
 
