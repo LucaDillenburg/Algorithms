@@ -117,11 +117,11 @@ void testHashTable() {
 void testGetWord() {
   FILE *file = fopen("./src/tests/file", "r");
   while (1) {
-    int _ = 0;
-    char *str = nextWordInFile(file, &_);
+    int line = 0;
+    char *str = nextWordInFile(file, &line);
     if (str == NULL)
       break;
-    printf("'%s'\n", str);
+    printf("'%s' | pulou linha: %d\n", str, line);
     free(str);
   }
 }

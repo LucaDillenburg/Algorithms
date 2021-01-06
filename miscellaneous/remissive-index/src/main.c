@@ -23,17 +23,28 @@ struct wordOccurance *newWordOccurance(int line);
 struct wordOccurance *getOccuranceInLine(struct list list_of_occurances,
                                          int line);
 
+int algorithm(char *file_name);
+
 int main() {
+  algorithm("./src/tests/file");
+  /* testGetWord(); */
+  return 0;
+}
+
+int maina() {
+  char file_name[MAX_LENGTH_FILE_NAME];
+  scanf(" %[^\n]", file_name);
+  algorithm(file_name);
+  return 0;
+}
+
+int algorithm(char *file_name) {
   FILE *file;
   struct hashtable table =
       createHashTable((unsigned int (*)(void *))hashForString,
                       (char (*)(void *, void *))stringIsEqualTo);
   int cur_line = 1;
   struct vector word_cells_ptrs = createVector(AVG_WORDS);
-
-  char file_name[MAX_LENGTH_FILE_NAME];
-  scanf(" %[^\n]", file_name);
-
   file = fopen(file_name, "r");
   if (file == NULL) {
     printf("Error: couldn't open file '%s'!\n", file_name);
@@ -41,8 +52,7 @@ int main() {
   }
 
   while (1) {
-    int next_word_line_index = cur_line;
-    char *str = nextWordInFile(file, &next_word_line_index);
+    char *str = nextWordInFile(file, &cur_line);
     struct list *list_of_occurances = NULL;
     if (str == NULL)
       break;
@@ -64,7 +74,6 @@ int main() {
       else
         occurance_in_line->amount++;
     }
-    cur_line = next_word_line_index;
   }
 
   sortCells((struct hashcell **)word_cells_ptrs.array, word_cells_ptrs.last);

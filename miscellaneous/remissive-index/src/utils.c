@@ -1,20 +1,19 @@
 #include "utils.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-char isEndOfWord(char c, int length_before_char) {
+char isCharWord(char c) {
   if (c >= 'a' && c <= 'z')
-    return 0;
+    return 1;
   if (c >= 'A' && c <= 'Z')
-    return 0;
+    return 1;
   if (c >= '0' && c <= '9')
-    return 0;
-  if (c == '-' && length_before_char != 0)
-    return 0;
-  return 1;
+    return 1;
+  return 0;
 }
 
-char *nextWordInFile(FILE *file, int *next_word_line_index) {
+char *nextWordInFile(FILE *file, int *cur_word_line_index) {
   char *buff = (char *)malloc(sizeof(char) * MAX_LENGTH_WORD);
   int length = 0;
 
@@ -25,18 +24,21 @@ char *nextWordInFile(FILE *file, int *next_word_line_index) {
         return NULL;
       break;
     }
-    if (isEndOfWord(c, length)) {
-      if (c == '\n')
-        (*next_word_line_index)++;
-      if (length > 0)
-        break;
-      continue;
-    }
 
-    buff[length] = c;
-    length++;
+    if ((c == '-' && length != 0) || isCharWord(c)) {
+      buff[length] = c;
+      length++;
+    } else {
+      if (length != 0) {
+        ungetc(c, file);
+        break;
+      } else if (c == '\n')
+        (*cur_word_line_index)++;
+    }
   }
 
+  while (buff[length - 1] == '-')
+    length--;
   buff[length] = '\0';
   return buff;
 }
